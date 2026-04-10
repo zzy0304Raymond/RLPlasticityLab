@@ -8,6 +8,8 @@ Low-cost plasticity diagnostics for reinforcement learning models.
 
 This project is built for fast triage, not experiment replacement. It is most useful when training gets weird and you want a cheap first pass before touching reward design, environment code, or large training jobs.
 
+Technical Report: [GitHub Pages report](docs/index.md)
+
 ## What It Looks Like In Practice
 
 Healthy checkpoint vs a checkpoint with a frozen encoder:
