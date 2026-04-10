@@ -1,0 +1,34 @@
+[
+  {
+    "case": "healthy",
+    "summary": "No acute issue detected. Plasticity score=1.000 (update-active=1.000, grad-active=1.000)",
+    "findings": "none",
+    "text": "healthy.txt",
+    "json": "healthy.json",
+    "html": "healthy.html"
+  },
+  {
+    "case": "frozen_encoder",
+    "summary": "The encoder is adapting less than downstream layers.",
+    "findings": "encoder_bottleneck",
+    "text": "frozen_encoder.txt",
+    "json": "frozen_encoder.json",
+    "html": "frozen_encoder.html"
+  },
+  {
+    "case": "frozen_policy_head",
+    "summary": "The output heads are adapting less than the trunk.",
+    "findings": "head_saturation",
+    "text": "frozen_policy_head.txt",
+    "json": "frozen_policy_head.json",
+    "html": "frozen_policy_head.html"
+  },
+  {
+    "case": "global_stall",
+    "summary": "The model looks globally plasticity-limited.",
+    "findings": "global_plasticity_stall",
+    "text": "global_stall.txt",
+    "json": "global_stall.json",
+    "html": "global_stall.html"
+  }
+]

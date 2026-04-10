@@ -1,0 +1,167 @@
+{
+  "analyzer_name": "plasticity/default",
+  "snapshot": {
+    "kind": "plasticity_probe",
+    "evidence_level": "update",
+    "step": 1,
+    "loss": 1.448103904724121,
+    "layers": [
+      {
+        "name": "encoder.0",
+        "group": "encoder",
+        "module_type": "Linear",
+        "parameter_count": 288,
+        "parameter_norm": 3.3534579277038574,
+        "parameter_mean_abs": 0.16980116069316864,
+        "parameter_zero_fraction": 0.0,
+        "parameter_max_abs": 0.35351577401161194,
+        "gradient_norm": 0.11852888762950897,
+        "update_norm": 0.005091103725135326,
+        "relative_update": 0.0015181653788098218,
+        "grad_to_weight_ratio": 0.03534527350121454,
+        "activation_mean": -0.050691016018390656,
+        "activation_std": 0.5646414160728455,
+        "activation_shift": null,
+        "zero_activation_fraction": 0.0,
+        "max_activation_abs": 1.9542341232299805,
+        "metadata": {}
+      },
+      {
+        "name": "trunk.0",
+        "group": "trunk",
+        "module_type": "Linear",
+        "parameter_count": 1056,
+        "parameter_norm": 3.4090445041656494,
+        "parameter_mean_abs": 0.09176577627658844,
+        "parameter_zero_fraction": 0.0,
+        "parameter_max_abs": 0.1768421232700348,
+        "gradient_norm": 0.2622995674610138,
+        "update_norm": 0.009748701006174088,
+        "relative_update": 0.0028596578877928274,
+        "grad_to_weight_ratio": 0.07694225380176156,
+        "activation_mean": -0.012912792153656483,
+        "activation_std": 0.28502771258354187,
+        "activation_shift": null,
+        "zero_activation_fraction": 0.0,
+        "max_activation_abs": 0.9163632392883301,
+        "metadata": {}
+      },
+      {
+        "name": "policy_head",
+        "group": "policy",
+        "module_type": "Linear",
+        "parameter_count": 132,
+        "parameter_norm": 1.1727416515350342,
+        "parameter_mean_abs": 0.08844778686761856,
+        "parameter_zero_fraction": 0.0,
+        "parameter_max_abs": 0.17601703107357025,
+        "gradient_norm": 0.0,
+        "update_norm": 0.0,
+        "relative_update": 0.0,
+        "grad_to_weight_ratio": 0.0,
+        "activation_mean": 0.020927976816892624,
+        "activation_std": 0.09427108615636826,
+        "activation_shift": null,
+        "zero_activation_fraction": 0.0,
+        "max_activation_abs": 0.28385788202285767,
+        "metadata": {}
+      }
+    ],
+    "metadata": {
+      "validation_case": "frozen_policy_head",
+      "demo_accuracy": 0.21875,
+      "cross_entropy": 1.383522391319275
+    },
+    "caveats": [
+      "This is a low-cost plasticity probe, not a full experiment. Treat the result as ranked evidence for where to investigate next."
+    ]
+  },
+  "metrics": {
+    "plasticity_score": {
+      "name": "plasticity_score",
+      "value": 0.7777777777777777,
+      "summary": "Plasticity score=0.778 (update-active=0.667, grad-active=0.667)",
+      "metadata": {
+        "update_active_fraction": 0.6666666666666666,
+        "grad_active_fraction": 0.6666666666666666,
+        "activation_health": 1.0
+      }
+    },
+    "stagnant_layer_fraction": {
+      "name": "stagnant_layer_fraction",
+      "value": 0.3333333333333333,
+      "summary": "Stagnant layer fraction=0.333 (examples: policy_head)",
+      "metadata": {
+        "stagnant_layers": [
+          "policy_head"
+        ],
+        "eligible_layers": 3
+      }
+    },
+    "encoder_plasticity_score": {
+      "name": "encoder_plasticity_score",
+      "value": 1.0,
+      "summary": "encoder plasticity score=1.000",
+      "metadata": {
+        "layer_count": 1,
+        "mean_relative_update": 0.0015181653788098218,
+        "mean_grad_to_weight_ratio": 0.03534527350121454
+      }
+    },
+    "trunk_plasticity_score": {
+      "name": "trunk_plasticity_score",
+      "value": 1.0,
+      "summary": "trunk plasticity score=1.000",
+      "metadata": {
+        "layer_count": 1,
+        "mean_relative_update": 0.0028596578877928274,
+        "mean_grad_to_weight_ratio": 0.07694225380176156
+      }
+    },
+    "policy_plasticity_score": {
+      "name": "policy_plasticity_score",
+      "value": 0.0,
+      "summary": "policy plasticity score=0.000",
+      "metadata": {
+        "layer_count": 1,
+        "mean_relative_update": 0.0,
+        "mean_grad_to_weight_ratio": 0.0
+      }
+    },
+    "value_plasticity_score": {
+      "name": "value_plasticity_score",
+      "value": 0.0,
+      "summary": "No value layers were captured.",
+      "metadata": {}
+    },
+    "mean_activation_shift": {
+      "name": "mean_activation_shift",
+      "value": 0.0,
+      "summary": "Mean activation shift=0.000000",
+      "metadata": {
+        "samples": 0
+      }
+    }
+  },
+  "findings": [
+    {
+      "name": "head_saturation",
+      "severity": "medium",
+      "summary": "The output heads are adapting less than the trunk.",
+      "evidence": [
+        "trunk_plasticity_score=1.000",
+        "policy_plasticity_score=0.000"
+      ],
+      "recommendations": [
+        "Inspect whether policy/value logits are saturating or whether loss scaling is suppressing head updates.",
+        "Check action distribution entropy or critic target magnitudes alongside this report.",
+        "Consider per-head learning-rate tuning or initialization changes."
+      ],
+      "confidence": "medium",
+      "metadata": {}
+    }
+  ],
+  "caveats": [
+    "This is a low-cost plasticity probe, not a full experiment. Treat the result as ranked evidence for where to investigate next."
+  ]
+}

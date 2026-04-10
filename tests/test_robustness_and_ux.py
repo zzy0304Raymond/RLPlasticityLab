@@ -131,6 +131,49 @@ class PyTorchRobustnessTests(unittest.TestCase):
         finding_names = {finding.name for finding in report.findings}
         self.assertIn("encoder_bottleneck", finding_names)
 
+    def test_head_saturation_triggers_on_frozen_policy_head(self) -> None:
+        from examples.rl_actor_case import actor_loss, build_actor, build_optimizer, make_batch
+        from rlplasticity import probe_plasticity
+
+        model = build_actor()
+        for parameter in model.policy_head.parameters():
+            parameter.requires_grad = False
+        optimizer = build_optimizer(model)
+        batch = make_batch()
+
+        report = probe_plasticity(
+            model,
+            [batch],
+            loss_fn=actor_loss,
+            optimizer=optimizer,
+            metadata={"scenario": "frozen-policy-head"},
+        )
+
+        finding_names = {finding.name for finding in report.findings}
+        self.assertIn("head_saturation", finding_names)
+
+    def test_global_stall_triggers_on_zero_signal_loss(self) -> None:
+        from examples.rl_actor_case import build_actor, build_optimizer, make_batch
+        from rlplasticity import probe_plasticity
+
+        def zero_signal_loss(model, batch):
+            return (model(batch["obs"]) * 0.0).sum()
+
+        model = build_actor()
+        optimizer = build_optimizer(model)
+        batch = make_batch()
+
+        report = probe_plasticity(
+            model,
+            [batch],
+            loss_fn=zero_signal_loss,
+            optimizer=optimizer,
+            metadata={"scenario": "global-stall"},
+        )
+
+        finding_names = {finding.name for finding in report.findings}
+        self.assertIn("global_plasticity_stall", finding_names)
+
 
 @unittest.skipUnless(torch is not None, "PyTorch is required for UX integration tests.")
 class UserExperienceTests(unittest.TestCase):

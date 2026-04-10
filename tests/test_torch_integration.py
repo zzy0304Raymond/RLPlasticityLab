@@ -133,6 +133,18 @@ class TorchIntegrationTests(unittest.TestCase):
             self.assertTrue(outputs["healthy_probe_html"].exists())
             self.assertTrue(outputs["frozen_probe_html"].exists())
 
+    def test_validation_suite_emits_expected_cases(self) -> None:
+        from examples.validation_suite import generate_validation_suite
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            outputs = generate_validation_suite(temp_dir)
+            self.assertTrue(outputs["summary_json"].exists())
+            self.assertTrue(outputs["readme"].exists())
+            summary = outputs["summary_json"].read_text(encoding="utf-8")
+            self.assertIn("frozen_encoder", summary)
+            self.assertIn("frozen_policy_head", summary)
+            self.assertIn("global_stall", summary)
+
 
 if __name__ == "__main__":
     unittest.main()

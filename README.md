@@ -101,33 +101,43 @@ It focuses only on **model plasticity** and reports evidence with explicit cavea
 `RLPlasticity` supports three progressively stronger workflows.
 
 ### 1. `scan_checkpoint`
+
 You have:
+
 - only a checkpoint or `state_dict`
 
 You get:
+
 - parameter norm and sparsity statistics
 - `encoder / trunk / policy / value` grouping
 - low-confidence structural hints
 
 Best for:
-- “I only have `actor.pt`, is anything obviously strange?”
+
+- "I only have `actor.pt`; is anything obviously strange?"
 
 ### 2. `probe_model`
+
 You have:
+
 - a loadable model
 - one batch of samples
 - optionally a checkpoint to load
 
 You get:
+
 - forward-only activation health
 - low-response hints
 - a cheap sanity check before running update probes
 
 Best for:
-- “Does this model even respond normally on real observations?”
+
+- "Does this model even respond normally on real observations?"
 
 ### 3. `probe_plasticity`
+
 You have:
+
 - a loadable model
 - one or more batches
 - a loss function
@@ -135,13 +145,15 @@ You have:
 - optionally a checkpoint to load
 
 You get:
+
 - gradient reachability
 - relative update strength
 - stagnant-layer statistics
 - encoder/trunk/head plasticity hints
 
 Best for:
-- “Is this checkpoint still learning, or has part of the model gone stale?”
+
+- "Is this checkpoint still learning, or has part of the model gone stale?"
 
 ## Installation
 
@@ -270,6 +282,12 @@ Generate the homepage showcase artifacts:
 python -m examples.showcase_reports --output-dir docs/showcase
 ```
 
+Generate the release validation suite:
+
+```bash
+python -m examples.validation_suite --output-dir docs/validation
+```
+
 ## What You Get Back
 
 Each report includes:
@@ -300,16 +318,24 @@ src/rlplasticity/
   cli.py         # command-line entry point
 ```
 
-See [ARCHITECTURE.md](/C:/Users/22050/Desktop/RLPlasticityLab/docs/ARCHITECTURE.md) for the framework design.
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the framework design.
+
+Release-oriented docs:
+
+- Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- Validation: [docs/VALIDATION.md](docs/VALIDATION.md)
+- Changelog: [docs/CHANGELOG.md](docs/CHANGELOG.md)
+- Release checklist: [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md)
+- Release report: [docs/RELEASE_REPORT_v0.1.0.md](docs/RELEASE_REPORT_v0.1.0.md)
 
 ## Open Source Standards
 
 This repository currently uses:
 
-- License: MIT, see [LICENSE](/C:/Users/22050/Desktop/RLPlasticityLab/LICENSE)
-- Contribution guide: [CONTRIBUTING.md](/C:/Users/22050/Desktop/RLPlasticityLab/CONTRIBUTING.md)
-- Code of conduct: [CODE_OF_CONDUCT.md](/C:/Users/22050/Desktop/RLPlasticityLab/CODE_OF_CONDUCT.md)
-- Security policy: [SECURITY.md](/C:/Users/22050/Desktop/RLPlasticityLab/SECURITY.md)
+- License: MIT, see [LICENSE](LICENSE)
+- Contribution guide: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Code of conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- Security policy: [SECURITY.md](SECURITY.md)
 
 ## Security Notes
 
@@ -321,14 +347,21 @@ That means:
 - treat untrusted model files as potentially unsafe
 - prefer isolated environments when inspecting third-party artifacts
 
-See [SECURITY.md](/C:/Users/22050/Desktop/RLPlasticityLab/SECURITY.md) for the project policy.
+See [SECURITY.md](SECURITY.md) for the project policy.
 
 ## Development
 
-Run the test suite:
+Run the test suite in PowerShell:
 
 ```bash
-PYTHONPATH=src;. python -m unittest discover -s tests -v
+$env:PYTHONPATH="src;."
+python -m unittest discover -s tests -v
+```
+
+Run the test suite in bash:
+
+```bash
+PYTHONPATH=src:. python -m unittest discover -s tests -v
 ```
 
 Current coverage includes:

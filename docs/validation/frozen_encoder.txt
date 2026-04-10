@@ -1,0 +1,28 @@
+RLPlasticity Report | analyzer=plasticity/default | kind=plasticity_probe | evidence=update | layers=3
+loss=1.448104
+summary=The encoder is adapting less than downstream layers.
+
+Metrics
+- Plasticity score=0.778 (update-active=0.667, grad-active=0.667)
+- Stagnant layer fraction=0.333 (examples: encoder.0)
+- encoder plasticity score=0.000
+- trunk plasticity score=1.000
+- policy plasticity score=1.000
+- No value layers were captured.
+- Mean activation shift=0.000000
+
+Findings
+- [medium/medium] The encoder is adapting less than downstream layers.
+  evidence: encoder_plasticity_score=0.000
+  evidence: reference_downstream_score=1.000
+  next: Inspect encoder-specific gradients and update magnitudes across several consecutive steps.
+  next: Check whether observations or augmentations are causing feature collapse or over-stable representations.
+  next: Consider lower encoder regularization or a separate optimizer schedule for the encoder.
+
+Caveats
+- This is a low-cost plasticity probe, not a full experiment. Treat the result as ranked evidence for where to investigate next.
+
+Lowest-Update Layers
+- encoder.0 [encoder] rel_update=0.000000e+00 grad/weight=0.000000e+00
+- trunk.0 [trunk] rel_update=2.859658e-03 grad/weight=7.694225e-02
+- policy_head [policy] rel_update=2.938991e-03 grad/weight=2.216504e-01

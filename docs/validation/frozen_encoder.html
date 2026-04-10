@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>RLPlasticity Report</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f0e8;
+      --card: #fffdf8;
+      --ink: #1f1d1a;
+      --muted: #6b6257;
+      --accent: #0d6b57;
+      --line: #d7cbbd;
+    }
+    body {
+      margin: 0;
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(13, 107, 87, 0.12), transparent 28%),
+        linear-gradient(180deg, #f7f2ea, var(--bg));
+      color: var(--ink);
+    }
+    main {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 14px 34px rgba(31, 29, 26, 0.06);
+    }
+    h1, h2, h3 {
+      margin-top: 0;
+    }
+    ul {
+      padding-left: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+    }
+    .finding {
+      border-left: 4px solid var(--accent);
+      padding-left: 14px;
+      margin-bottom: 14px;
+    }
+    .meta {
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="card">
+      <h1>RLPlasticity Report</h1>
+      <p class="meta">analyzer=plasticity/default | kind=plasticity_probe | evidence=update | layers=3 | loss=1.448103904724121</p>
+      <p>The encoder is adapting less than downstream layers.</p>
+    </section>
+    <section class="card">
+      <h2>Metrics</h2>
+      <ul><li><strong>plasticity_score</strong>: Plasticity score=0.778 (update-active=0.667, grad-active=0.667)</li><li><strong>stagnant_layer_fraction</strong>: Stagnant layer fraction=0.333 (examples: encoder.0)</li><li><strong>encoder_plasticity_score</strong>: encoder plasticity score=0.000</li><li><strong>trunk_plasticity_score</strong>: trunk plasticity score=1.000</li><li><strong>policy_plasticity_score</strong>: policy plasticity score=1.000</li><li><strong>value_plasticity_score</strong>: No value layers were captured.</li><li><strong>mean_activation_shift</strong>: Mean activation shift=0.000000</li></ul>
+    </section>
+    <section class="card">
+      <h2>Findings</h2>
+      <section class='finding'><h3>MEDIUM: The encoder is adapting less than downstream layers.</h3><p><strong>Rule:</strong> encoder_bottleneck | <strong>Confidence:</strong> medium</p><ul><li>encoder_plasticity_score=0.000</li><li>reference_downstream_score=1.000</li></ul><ul><li>Inspect encoder-specific gradients and update magnitudes across several consecutive steps.</li><li>Check whether observations or augmentations are causing feature collapse or over-stable representations.</li><li>Consider lower encoder regularization or a separate optimizer schedule for the encoder.</li></ul></section>
+    </section>
+    <section class="card">
+      <h2>Caveats</h2>
+      <ul><li>This is a low-cost plasticity probe, not a full experiment. Treat the result as ranked evidence for where to investigate next.</li></ul>
+    </section>
+    <section class="card">
+      <h2>Lowest-Update Layers</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Layer</th>
+            <th>Group</th>
+            <th>Relative Update</th>
+            <th>Activation Std</th>
+            <th>Parameter Norm</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>encoder.0</td><td>encoder</td><td>0.000000e+00</td><td>5.646414e-01</td><td>3.353414e+00</td></tr><tr><td>trunk.0</td><td>trunk</td><td>2.859658e-03</td><td>2.850277e-01</td><td>3.409045e+00</td></tr><tr><td>policy_head</td><td>policy</td><td>2.938991e-03</td><td>9.427109e-02</td><td>1.172762e+00</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+</body>
+</html>

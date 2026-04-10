@@ -1,0 +1,29 @@
+RLPlasticity Report | analyzer=plasticity/default | kind=plasticity_probe | evidence=update | layers=3
+loss=0.000000
+summary=The model looks globally plasticity-limited.
+
+Metrics
+- Plasticity score=0.333 (update-active=0.000, grad-active=0.000)
+- Stagnant layer fraction=1.000 (examples: encoder.0, trunk.0, policy_head)
+- encoder plasticity score=0.000
+- trunk plasticity score=0.000
+- policy plasticity score=0.000
+- No value layers were captured.
+- Mean activation shift=0.000000
+
+Findings
+- [high/medium] The model looks globally plasticity-limited.
+  evidence: plasticity_score=0.333
+  evidence: stagnant_layer_fraction=1.000
+  evidence: captured_layers=3
+  next: Check whether learning rates, normalization, or optimizer settings are suppressing effective updates.
+  next: Compare early-training and current checkpoints to verify whether representational change has slowed down.
+  next: Inspect reward scaling before concluding the issue is purely architectural.
+
+Caveats
+- This is a low-cost plasticity probe, not a full experiment. Treat the result as ranked evidence for where to investigate next.
+
+Lowest-Update Layers
+- encoder.0 [encoder] rel_update=0.000000e+00 grad/weight=0.000000e+00
+- trunk.0 [trunk] rel_update=0.000000e+00 grad/weight=0.000000e+00
+- policy_head [policy] rel_update=0.000000e+00 grad/weight=0.000000e+00

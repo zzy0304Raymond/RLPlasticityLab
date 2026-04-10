@@ -1,0 +1,28 @@
+RLPlasticity Report | analyzer=plasticity/default | kind=plasticity_probe | evidence=update | layers=3
+loss=1.448104
+summary=The output heads are adapting less than the trunk.
+
+Metrics
+- Plasticity score=0.778 (update-active=0.667, grad-active=0.667)
+- Stagnant layer fraction=0.333 (examples: policy_head)
+- encoder plasticity score=1.000
+- trunk plasticity score=1.000
+- policy plasticity score=0.000
+- No value layers were captured.
+- Mean activation shift=0.000000
+
+Findings
+- [medium/medium] The output heads are adapting less than the trunk.
+  evidence: trunk_plasticity_score=1.000
+  evidence: policy_plasticity_score=0.000
+  next: Inspect whether policy/value logits are saturating or whether loss scaling is suppressing head updates.
+  next: Check action distribution entropy or critic target magnitudes alongside this report.
+  next: Consider per-head learning-rate tuning or initialization changes.
+
+Caveats
+- This is a low-cost plasticity probe, not a full experiment. Treat the result as ranked evidence for where to investigate next.
+
+Lowest-Update Layers
+- policy_head [policy] rel_update=0.000000e+00 grad/weight=0.000000e+00
+- encoder.0 [encoder] rel_update=1.518165e-03 grad/weight=3.534527e-02
+- trunk.0 [trunk] rel_update=2.859658e-03 grad/weight=7.694225e-02
