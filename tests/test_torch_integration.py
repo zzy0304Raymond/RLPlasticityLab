@@ -123,6 +123,17 @@ class TorchIntegrationTests(unittest.TestCase):
         self.assertIn("kind=plasticity_probe", probe_plasticity_process.stdout)
         self.assertIn("plasticity score", probe_plasticity_process.stdout.lower())
 
+    def test_showcase_generator_emits_demo_artifacts(self) -> None:
+        from examples.showcase_reports import generate_showcase
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            outputs = generate_showcase(temp_dir)
+            self.assertTrue(outputs["comparison_svg"].exists())
+            self.assertTrue(outputs["healthy_probe_json"].exists())
+            self.assertTrue(outputs["frozen_probe_json"].exists())
+            self.assertTrue(outputs["healthy_probe_html"].exists())
+            self.assertTrue(outputs["frozen_probe_html"].exists())
+
 
 if __name__ == "__main__":
     unittest.main()

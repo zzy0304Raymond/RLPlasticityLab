@@ -1,0 +1,21 @@
+RLPlasticity Report | analyzer=probe/forward | kind=model_probe | evidence=forward | layers=3
+summary=No acute issue detected. Activation health score=1.000
+
+Metrics
+- Activation health score=1.000
+- Low-variation layer fraction=0.000
+- encoder activation health=1.000
+- trunk activation health=1.000
+- policy activation health=1.000
+- No value activation stats were captured.
+
+Findings
+- No diagnostic rule fired.
+
+Caveats
+- This is a forward-only probe. It can show activation health and local responsiveness, but not true plasticity under optimization.
+
+Lowest-Variation Layers
+- policy_head [policy] activation_std=9.427109e-02 zero_frac=0.000000
+- trunk.0 [trunk] activation_std=2.850277e-01 zero_frac=0.000000
+- encoder.0 [encoder] activation_std=5.646414e-01 zero_frac=0.000000

@@ -1,0 +1,20 @@
+RLPlasticity Report | analyzer=scan/checkpoint | kind=checkpoint_scan | evidence=static | layers=6
+summary=No acute issue detected.
+
+Metrics
+- Mean parameter zero fraction=0.000
+- Parameter norm dispersion=2.774
+- Small-norm layer fraction=0.000
+
+Findings
+- No diagnostic rule fired.
+
+Caveats
+- This is a static checkpoint scan. It cannot measure gradient flow, update effectiveness, or true plasticity loss.
+
+Smallest-Norm Layers
+- policy_head.bias [policy] param_norm=8.793919e-02 zero_frac=0.000000
+- trunk.0.bias [trunk] param_norm=6.653254e-01 zero_frac=0.000000
+- policy_head.weight [policy] param_norm=1.169440e+00 zero_frac=0.000000
+- encoder.0.bias [encoder] param_norm=1.241172e+00 zero_frac=0.000000
+- encoder.0.weight [encoder] param_norm=3.115265e+00 zero_frac=0.000000

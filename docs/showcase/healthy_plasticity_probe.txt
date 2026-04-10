@@ -1,0 +1,23 @@
+RLPlasticity Report | analyzer=plasticity/default | kind=plasticity_probe | evidence=update | layers=3
+loss=1.448104
+summary=No acute issue detected. Plasticity score=1.000 (update-active=1.000, grad-active=1.000)
+
+Metrics
+- Plasticity score=1.000 (update-active=1.000, grad-active=1.000)
+- Stagnant layer fraction=0.000
+- encoder plasticity score=1.000
+- trunk plasticity score=1.000
+- policy plasticity score=1.000
+- No value layers were captured.
+- Mean activation shift=0.000000
+
+Findings
+- No diagnostic rule fired.
+
+Caveats
+- This is a low-cost plasticity probe, not a full experiment. Treat the result as ranked evidence for where to investigate next.
+
+Lowest-Update Layers
+- encoder.0 [encoder] rel_update=1.518165e-03 grad/weight=3.534527e-02
+- trunk.0 [trunk] rel_update=2.859658e-03 grad/weight=7.694225e-02
+- policy_head [policy] rel_update=2.938991e-03 grad/weight=2.216504e-01

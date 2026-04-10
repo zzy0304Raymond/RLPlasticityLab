@@ -1,0 +1,200 @@
+{
+  "analyzer_name": "scan/checkpoint",
+  "snapshot": {
+    "kind": "checkpoint_scan",
+    "evidence_level": "static",
+    "step": null,
+    "loss": null,
+    "layers": [
+      {
+        "name": "encoder.0.weight",
+        "group": "encoder",
+        "module_type": "Parameter",
+        "parameter_count": 256,
+        "parameter_norm": 3.1152654202686283,
+        "parameter_mean_abs": 0.1667773863300681,
+        "parameter_zero_fraction": 0.0,
+        "parameter_max_abs": 0.3532157838344574,
+        "gradient_norm": null,
+        "update_norm": null,
+        "relative_update": null,
+        "grad_to_weight_ratio": null,
+        "activation_mean": null,
+        "activation_std": null,
+        "activation_shift": null,
+        "zero_activation_fraction": null,
+        "max_activation_abs": null,
+        "metadata": {
+          "shape": [
+            32,
+            8
+          ],
+          "source": "docs\\showcase\\artifacts\\actor.pt"
+        }
+      },
+      {
+        "name": "encoder.0.bias",
+        "group": "encoder",
+        "module_type": "Parameter",
+        "parameter_count": 32,
+        "parameter_norm": 1.2411720769882852,
+        "parameter_mean_abs": 0.19406641693785787,
+        "parameter_zero_fraction": 0.0,
+        "parameter_max_abs": 0.3430611193180084,
+        "gradient_norm": null,
+        "update_norm": null,
+        "relative_update": null,
+        "grad_to_weight_ratio": null,
+        "activation_mean": null,
+        "activation_std": null,
+        "activation_shift": null,
+        "zero_activation_fraction": null,
+        "max_activation_abs": null,
+        "metadata": {
+          "shape": [
+            32
+          ],
+          "source": "docs\\showcase\\artifacts\\actor.pt"
+        }
+      },
+      {
+        "name": "trunk.0.weight",
+        "group": "trunk",
+        "module_type": "Parameter",
+        "parameter_count": 1024,
+        "parameter_norm": 3.343577718064311,
+        "parameter_mean_abs": 0.09137651448691031,
+        "parameter_zero_fraction": 0.0,
+        "parameter_max_abs": 0.17663080990314484,
+        "gradient_norm": null,
+        "update_norm": null,
+        "relative_update": null,
+        "grad_to_weight_ratio": null,
+        "activation_mean": null,
+        "activation_std": null,
+        "activation_shift": null,
+        "zero_activation_fraction": null,
+        "max_activation_abs": null,
+        "metadata": {
+          "shape": [
+            32,
+            32
+          ],
+          "source": "docs\\showcase\\artifacts\\actor.pt"
+        }
+      },
+      {
+        "name": "trunk.0.bias",
+        "group": "trunk",
+        "module_type": "Parameter",
+        "parameter_count": 32,
+        "parameter_norm": 0.6653254129857709,
+        "parameter_mean_abs": 0.10412846365943551,
+        "parameter_zero_fraction": 0.0,
+        "parameter_max_abs": 0.17627857625484467,
+        "gradient_norm": null,
+        "update_norm": null,
+        "relative_update": null,
+        "grad_to_weight_ratio": null,
+        "activation_mean": null,
+        "activation_std": null,
+        "activation_shift": null,
+        "zero_activation_fraction": null,
+        "max_activation_abs": null,
+        "metadata": {
+          "shape": [
+            32
+          ],
+          "source": "docs\\showcase\\artifacts\\actor.pt"
+        }
+      },
+      {
+        "name": "policy_head.weight",
+        "group": "policy",
+        "module_type": "Parameter",
+        "parameter_count": 128,
+        "parameter_norm": 1.1694399628448358,
+        "parameter_mean_abs": 0.08988186379428953,
+        "parameter_zero_fraction": 0.0,
+        "parameter_max_abs": 0.17601703107357025,
+        "gradient_norm": null,
+        "update_norm": null,
+        "relative_update": null,
+        "grad_to_weight_ratio": null,
+        "activation_mean": null,
+        "activation_std": null,
+        "activation_shift": null,
+        "zero_activation_fraction": null,
+        "max_activation_abs": null,
+        "metadata": {
+          "shape": [
+            4,
+            32
+          ],
+          "source": "docs\\showcase\\artifacts\\actor.pt"
+        }
+      },
+      {
+        "name": "policy_head.bias",
+        "group": "policy",
+        "module_type": "Parameter",
+        "parameter_count": 4,
+        "parameter_norm": 0.08793918594721858,
+        "parameter_mean_abs": 0.04255739599466324,
+        "parameter_zero_fraction": 0.0,
+        "parameter_max_abs": 0.05353027582168579,
+        "gradient_norm": null,
+        "update_norm": null,
+        "relative_update": null,
+        "grad_to_weight_ratio": null,
+        "activation_mean": null,
+        "activation_std": null,
+        "activation_shift": null,
+        "zero_activation_fraction": null,
+        "max_activation_abs": null,
+        "metadata": {
+          "shape": [
+            4
+          ],
+          "source": "docs\\showcase\\artifacts\\actor.pt"
+        }
+      }
+    ],
+    "metadata": {
+      "source": "docs\\showcase\\artifacts\\actor.pt",
+      "parameter_entries": 6
+    },
+    "caveats": [
+      "This is a static checkpoint scan. It cannot measure gradient flow, update effectiveness, or true plasticity loss."
+    ]
+  },
+  "metrics": {
+    "mean_parameter_zero_fraction": {
+      "name": "mean_parameter_zero_fraction",
+      "value": 0.0,
+      "summary": "Mean parameter zero fraction=0.000",
+      "metadata": {}
+    },
+    "parameter_norm_dispersion": {
+      "name": "parameter_norm_dispersion",
+      "value": 2.7740487999020993,
+      "summary": "Parameter norm dispersion=2.774",
+      "metadata": {
+        "median_norm": 1.2053060199165606
+      }
+    },
+    "small_norm_layer_fraction": {
+      "name": "small_norm_layer_fraction",
+      "value": 0.0,
+      "summary": "Small-norm layer fraction=0.000",
+      "metadata": {
+        "small_norm_layers": [],
+        "threshold": 0.06026530099582803
+      }
+    }
+  },
+  "findings": [],
+  "caveats": [
+    "This is a static checkpoint scan. It cannot measure gradient flow, update effectiveness, or true plasticity loss."
+  ]
+}

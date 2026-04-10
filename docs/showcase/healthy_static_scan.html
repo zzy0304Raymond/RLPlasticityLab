@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>RLPlasticity Report</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f0e8;
+      --card: #fffdf8;
+      --ink: #1f1d1a;
+      --muted: #6b6257;
+      --accent: #0d6b57;
+      --line: #d7cbbd;
+    }
+    body {
+      margin: 0;
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(13, 107, 87, 0.12), transparent 28%),
+        linear-gradient(180deg, #f7f2ea, var(--bg));
+      color: var(--ink);
+    }
+    main {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 14px 34px rgba(31, 29, 26, 0.06);
+    }
+    h1, h2, h3 {
+      margin-top: 0;
+    }
+    ul {
+      padding-left: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+    }
+    .finding {
+      border-left: 4px solid var(--accent);
+      padding-left: 14px;
+      margin-bottom: 14px;
+    }
+    .meta {
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="card">
+      <h1>RLPlasticity Report</h1>
+      <p class="meta">analyzer=scan/checkpoint | kind=checkpoint_scan | evidence=static | layers=6 | loss=None</p>
+      <p>No acute issue detected.</p>
+    </section>
+    <section class="card">
+      <h2>Metrics</h2>
+      <ul><li><strong>mean_parameter_zero_fraction</strong>: Mean parameter zero fraction=0.000</li><li><strong>parameter_norm_dispersion</strong>: Parameter norm dispersion=2.774</li><li><strong>small_norm_layer_fraction</strong>: Small-norm layer fraction=0.000</li></ul>
+    </section>
+    <section class="card">
+      <h2>Findings</h2>
+      <p>No diagnostic rule fired.</p>
+    </section>
+    <section class="card">
+      <h2>Caveats</h2>
+      <ul><li>This is a static checkpoint scan. It cannot measure gradient flow, update effectiveness, or true plasticity loss.</li></ul>
+    </section>
+    <section class="card">
+      <h2>Smallest-Norm Layers</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Layer</th>
+            <th>Group</th>
+            <th>Relative Update</th>
+            <th>Activation Std</th>
+            <th>Parameter Norm</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>policy_head.bias</td><td>policy</td><td>n/a</td><td>n/a</td><td>8.793919e-02</td></tr><tr><td>trunk.0.bias</td><td>trunk</td><td>n/a</td><td>n/a</td><td>6.653254e-01</td></tr><tr><td>policy_head.weight</td><td>policy</td><td>n/a</td><td>n/a</td><td>1.169440e+00</td></tr><tr><td>encoder.0.bias</td><td>encoder</td><td>n/a</td><td>n/a</td><td>1.241172e+00</td></tr><tr><td>encoder.0.weight</td><td>encoder</td><td>n/a</td><td>n/a</td><td>3.115265e+00</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+</body>
+</html>

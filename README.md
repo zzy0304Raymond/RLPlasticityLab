@@ -8,6 +8,71 @@ Low-cost plasticity diagnostics for reinforcement learning models.
 
 This project is built for fast triage, not experiment replacement. It is most useful when training gets weird and you want a cheap first pass before touching reward design, environment code, or large training jobs.
 
+## What It Looks Like In Practice
+
+Healthy checkpoint vs a checkpoint with a frozen encoder:
+
+![Healthy vs frozen encoder showcase](docs/showcase/healthy_vs_frozen_encoder.svg)
+
+The showcase above is generated from real report files committed in this repository.
+
+Healthy plasticity probe output:
+
+```text
+RLPlasticity Report | analyzer=plasticity/default | kind=plasticity_probe | evidence=update | layers=3
+loss=1.448104
+summary=No acute issue detected. Plasticity score=1.000 (update-active=1.000, grad-active=1.000)
+
+Findings
+- No diagnostic rule fired.
+```
+
+Frozen-encoder plasticity probe output:
+
+```text
+RLPlasticity Report | analyzer=plasticity/default | kind=plasticity_probe | evidence=update | layers=3
+loss=1.448104
+summary=The encoder is adapting less than downstream layers.
+
+Findings
+- [medium/medium] The encoder is adapting less than downstream layers.
+  evidence: encoder_plasticity_score=0.000
+  evidence: reference_downstream_score=1.000
+```
+
+Real generated artifacts:
+
+- Healthy plasticity text: [docs/showcase/healthy_plasticity_probe.txt](docs/showcase/healthy_plasticity_probe.txt)
+- Healthy plasticity JSON: [docs/showcase/healthy_plasticity_probe.json](docs/showcase/healthy_plasticity_probe.json)
+- Healthy plasticity HTML: [docs/showcase/healthy_plasticity_probe.html](docs/showcase/healthy_plasticity_probe.html)
+- Frozen encoder text: [docs/showcase/frozen_encoder_plasticity_probe.txt](docs/showcase/frozen_encoder_plasticity_probe.txt)
+- Frozen encoder JSON: [docs/showcase/frozen_encoder_plasticity_probe.json](docs/showcase/frozen_encoder_plasticity_probe.json)
+- Frozen encoder HTML: [docs/showcase/frozen_encoder_plasticity_probe.html](docs/showcase/frozen_encoder_plasticity_probe.html)
+
+Example JSON excerpt:
+
+```json
+{
+  "analyzer_name": "plasticity/default",
+  "snapshot": {
+    "kind": "plasticity_probe",
+    "evidence_level": "update",
+    "loss": 1.448103904724121
+  },
+  "metrics": {
+    "plasticity_score": {
+      "value": 1.0,
+      "summary": "Plasticity score=1.000 (update-active=1.000, grad-active=1.000)"
+    },
+    "encoder_plasticity_score": {
+      "value": 1.0,
+      "summary": "encoder plasticity score=1.000"
+    }
+  },
+  "findings": []
+}
+```
+
 ## What This Project Is For
 
 Use `RLPlasticity` when you want to inspect:
@@ -201,6 +266,12 @@ rlplasticity probe-plasticity \
   --optimizer examples.rl_actor_case:build_optimizer \
   --checkpoint reports/demo_rl_actor_case/actor.pt \
   --max-steps 1
+```
+
+Generate the homepage showcase artifacts:
+
+```bash
+python -m examples.showcase_reports --output-dir docs/showcase
 ```
 
 ## What You Get Back
