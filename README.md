@@ -1,87 +1,90 @@
 # RLPlasticity
 
-`RLPlasticity` is a low-cost diagnostics toolkit for answering one question quickly:
+Low-cost plasticity diagnostics for reinforcement learning models.
 
-**Has my RL model lost the capacity to adapt, and where does that loss seem to concentrate?**
+`RLPlasticity` helps you answer a practical question before you spend time on expensive reruns or ablations:
 
-This repository is not trying to replace full experiment validation. It is built for fast triage: use a checkpoint, a model, or a small amount of replay data to narrow the search space before you spend time on expensive ablations or full retraining runs.
+**Does this RL model still look capable of adapting, and where does a plasticity problem seem to concentrate?**
 
-## Project Boundary
+This project is built for fast triage, not experiment replacement. It is most useful when training gets weird and you want a cheap first pass before touching reward design, environment code, or large training jobs.
 
-`RLPlasticity` focuses on **model plasticity only**.
+## What This Project Is For
 
-It does not try to decide whether a failure is caused by reward design, exploration, data distribution, or environment bugs. Those questions are valuable, but they require broader task context and would make early diagnoses too speculative.
+Use `RLPlasticity` when you want to inspect:
 
-The first public release answers a narrower set of questions:
+- a single `actor.pt` or `policy.pt`
+- a checkpoint plus model code
+- a checkpoint plus model plus a small batch of replay or environment samples
 
-- Does this checkpoint show suspicious structural signs?
-- Does this model respond weakly on forward passes?
-- Does this model still produce meaningful gradient flow and updates on a short probe window?
+The toolkit is designed to help with questions like:
+
+- Does this checkpoint look structurally suspicious?
+- Is the model responding normally on real inputs?
+- Are gradients and updates still reaching the encoder, trunk, and heads?
 - Does the issue look global, encoder-side, or head-side?
+
+## What This Project Is Not
+
+This first release does **not** try to decide whether a failure comes from:
+
+- reward design
+- exploration
+- data collection
+- environment bugs
+- training orchestration issues outside the model
+
+It focuses only on **model plasticity** and reports evidence with explicit caveats.
 
 ## User Scenarios
 
-The toolkit is organized around three evidence levels.
+`RLPlasticity` supports three progressively stronger workflows.
 
 ### 1. `scan_checkpoint`
-Input:
-- `.pt` checkpoint or in-memory `state_dict`
+You have:
+- only a checkpoint or `state_dict`
 
-Service:
-- Static structural scan
-- Parameter norm and sparsity statistics
-- Grouping into `encoder / trunk / policy / value`
-- Low-confidence structural hints
+You get:
+- parameter norm and sparsity statistics
+- `encoder / trunk / policy / value` grouping
+- low-confidence structural hints
 
-What it cannot do:
-- It cannot measure gradients, updates, or true plasticity loss
+Best for:
+- “I only have `actor.pt`, is anything obviously strange?”
 
 ### 2. `probe_model`
-Input:
-- Loadable model
-- One sample batch
-- Optional checkpoint to load
+You have:
+- a loadable model
+- one batch of samples
+- optionally a checkpoint to load
 
-Service:
-- Forward-only probe
-- Activation health and low-response detection
-- Weak evidence about whether some modules look inactive
+You get:
+- forward-only activation health
+- low-response hints
+- a cheap sanity check before running update probes
 
-What it cannot do:
-- It still cannot prove plasticity loss under optimization
+Best for:
+- “Does this model even respond normally on real observations?”
 
 ### 3. `probe_plasticity`
-Input:
-- Loadable model
-- One or more batches
-- Loss function
-- Optimizer
-- Optional checkpoint to load
+You have:
+- a loadable model
+- one or more batches
+- a loss function
+- an optimizer
+- optionally a checkpoint to load
 
-Service:
-- Low-cost update probe
-- Gradient reachability, update effectiveness, activation shift
-- Rule-based plasticity findings
-- Global, encoder-side, and head-side bottleneck hints
+You get:
+- gradient reachability
+- relative update strength
+- stagnant-layer statistics
+- encoder/trunk/head plasticity hints
 
-This is the main value path for the repository.
+Best for:
+- “Is this checkpoint still learning, or has part of the model gone stale?”
 
-## Package Layout
+## Installation
 
-```text
-src/rlplasticity/
-  core/          # shared schemas, enums, aggregation, base interfaces
-  ingest/        # checkpoint loading and static summarization
-  probes/        # evidence collection workflows
-  plasticity/    # metrics, findings, analyzers
-  reporting/     # text/html rendering
-  cli.py         # command-line entry point
-  api.py         # public Python workflows
-```
-
-## Install
-
-Editable install:
+Install the package:
 
 ```bash
 pip install -e .
@@ -95,47 +98,28 @@ pip install -e ".[torch]"
 
 ## Quick Start
 
-### Static scan with only a checkpoint
+### A. Analyze a checkpoint directly
 
 ```python
 from rlplasticity import scan_checkpoint
 
-state_dict = {
-    "encoder.weight": [[0.0, 0.0], [0.0, 0.0]],
-    "policy.bias": [1.0, -1.0],
-}
-
-report = scan_checkpoint(state_dict)
+report = scan_checkpoint("actor.pt")
 print(report.to_text())
 ```
 
-### Low-cost plasticity probe
+### B. Run a forward-only probe
 
 ```python
-import torch
-import torch.nn as nn
+from rlplasticity import probe_model
 
+report = probe_model(model, batch_obs)
+print(report.to_text())
+```
+
+### C. Run a low-cost plasticity probe
+
+```python
 from rlplasticity import probe_plasticity
-
-
-class TinyActor(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.encoder = nn.Sequential(nn.Linear(8, 32), nn.ReLU())
-        self.policy_head = nn.Linear(32, 4)
-
-    def forward(self, obs):
-        return self.policy_head(self.encoder(obs))
-
-
-def loss_fn(model, batch):
-    logits = model(batch["obs"])
-    return (logits - batch["target"]).pow(2).mean()
-
-
-model = TinyActor()
-optimizer = torch.optim.Adam(model.parameters(), lr=3e-4)
-batch = {"obs": torch.randn(32, 8), "target": torch.randn(32, 4)}
 
 report = probe_plasticity(
     model,
@@ -147,11 +131,39 @@ report = probe_plasticity(
 print(report.to_text())
 ```
 
-See [examples/checkpoint_scan.py](/C:/Users/22050/Desktop/RLPlasticityLab/examples/checkpoint_scan.py) and [examples/minimal_torch_integration.py](/C:/Users/22050/Desktop/RLPlasticityLab/examples/minimal_torch_integration.py).
+## CLI Usage
 
-### Realistic actor checkpoint demo
+Static checkpoint scan:
 
-The repository also ships an importable demo case with:
+```bash
+rlplasticity scan --checkpoint actor.pt
+```
+
+Forward-only probe:
+
+```bash
+rlplasticity probe-model \
+  --builder mypkg.models:build_actor \
+  --samples batch.pt \
+  --checkpoint actor.pt \
+  --forward mypkg.probes:forward_batch
+```
+
+Plasticity probe:
+
+```bash
+rlplasticity probe-plasticity \
+  --builder mypkg.models:build_actor \
+  --samples batch.pt \
+  --loss mypkg.losses:actor_loss \
+  --optimizer mypkg.optim:build_optimizer \
+  --checkpoint actor.pt \
+  --max-steps 8
+```
+
+## Real Example In This Repo
+
+This repository ships a demo actor case with:
 
 - `build_actor`
 - `build_optimizer`
@@ -159,19 +171,19 @@ The repository also ships an importable demo case with:
 - `actor_loss`
 - `export_demo_artifacts`
 
-Generate a reusable `actor.pt` and `batch.pt` pair:
+Generate a reusable demo checkpoint and batch:
 
 ```bash
 python -m examples.rl_actor_case --output-dir reports/demo_rl_actor_case
 ```
 
-Run the full demo:
+Run the demo end-to-end:
 
 ```bash
 python -m examples.rl_actor_case --output-dir reports/demo_rl_actor_case --run
 ```
 
-Then probe those artifacts through the CLI:
+Or probe the generated files through the CLI:
 
 ```bash
 rlplasticity probe-model \
@@ -191,89 +203,81 @@ rlplasticity probe-plasticity \
   --max-steps 1
 ```
 
-## CLI
-
-Static scan:
-
-```bash
-rlplasticity scan --checkpoint actor.pt
-```
-
-Forward probe:
-
-```bash
-rlplasticity probe-model \
-  --builder mypkg.models:build_actor \
-  --samples batch.pt \
-  --checkpoint actor.pt
-```
-
-Plasticity probe:
-
-```bash
-rlplasticity probe-plasticity \
-  --builder mypkg.models:build_actor \
-  --samples batch.pt \
-  --loss mypkg.losses:actor_loss \
-  --checkpoint actor.pt \
-  --max-steps 8
-```
-
-## Reports
-
-All workflows can render to:
-
-- text
-- HTML
-- JSON via `report.to_dict()`
+## What You Get Back
 
 Each report includes:
 
 - analysis mode
 - evidence strength
+- key metrics
 - findings
 - caveats
-- a layer shortlist for follow-up inspection
+- a shortlist of layers worth checking next
 
-## Maturity Of This Release
+Reports can be rendered as:
 
-The first usable release is intentionally narrow:
+- text
+- HTML
+- JSON via `report.to_dict()`
 
-- PyTorch-first
-- Offline-first
-- Short-window probes instead of long experiments
-- Rule-based findings instead of learned diagnoses
+## Repository Layout
 
-That makes it cheap to run and easier to trust.
+```text
+src/rlplasticity/
+  core/          # shared schemas, enums, aggregation, base interfaces
+  ingest/        # checkpoint loading and static summarization
+  probes/        # evidence collection workflows
+  plasticity/    # metrics, rules, analyzers
+  reporting/     # text/html rendering
+  api.py         # public Python workflows
+  cli.py         # command-line entry point
+```
+
+See [ARCHITECTURE.md](/C:/Users/22050/Desktop/RLPlasticityLab/docs/ARCHITECTURE.md) for the framework design.
+
+## Open Source Standards
+
+This repository currently uses:
+
+- License: MIT, see [LICENSE](/C:/Users/22050/Desktop/RLPlasticityLab/LICENSE)
+- Contribution guide: [CONTRIBUTING.md](/C:/Users/22050/Desktop/RLPlasticityLab/CONTRIBUTING.md)
+- Code of conduct: [CODE_OF_CONDUCT.md](/C:/Users/22050/Desktop/RLPlasticityLab/CODE_OF_CONDUCT.md)
+- Security policy: [SECURITY.md](/C:/Users/22050/Desktop/RLPlasticityLab/SECURITY.md)
+
+## Security Notes
+
+This project currently works with PyTorch checkpoints and `torch.load(...)`.
+
+That means:
+
+- only load checkpoints you trust
+- treat untrusted model files as potentially unsafe
+- prefer isolated environments when inspecting third-party artifacts
+
+See [SECURITY.md](/C:/Users/22050/Desktop/RLPlasticityLab/SECURITY.md) for the project policy.
+
+## Development
+
+Run the test suite:
+
+```bash
+PYTHONPATH=src;. python -m unittest discover -s tests -v
+```
+
+Current coverage includes:
+
+- analyzer logic
+- CLI behavior
+- report serialization
+- robustness edge cases
+- optional PyTorch API and CLI integration
 
 ## Roadmap
 
 Planned next:
 
+- more pathological demo cases such as frozen encoders and weak heads
 - checkpoint sequence analysis
-- stronger replay-window aggregation
+- stronger short-window trend analysis
 - CleanRL / SB3 integration helpers
-- richer encoder/trunk/head grouping configuration
-- online periodic monitoring
-
-## Development
-
-Run tests with the standard library test runner:
-
-```bash
-PYTHONPATH=src python -m unittest discover -s tests -v
-```
-
-The current test suite focuses on:
-
-- analyzer logic
-- report serialization
-- CLI bootstrapping
-- optional PyTorch API/CLI integration when `torch` is available
-
-## Non-Goals For v0.1
-
-- full RL training orchestration
-- reward diagnosis
-- environment debugging
-- all-purpose explainability tooling
+- lower-overhead online monitoring

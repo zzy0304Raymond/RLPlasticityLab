@@ -1,0 +1,36 @@
+name: Feature request
+description: Suggest a new capability or workflow improvement
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: What user scenario is currently hard or unsupported?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What should the project do?
+    validations:
+      required: true
+  - type: dropdown
+    id: evidence_level
+    attributes:
+      label: Related workflow
+      options:
+        - checkpoint scan
+        - forward probe
+        - plasticity probe
+        - reporting
+        - integrations
+        - docs
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any workaround or competing tool you considered
