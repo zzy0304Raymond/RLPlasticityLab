@@ -12,10 +12,6 @@ This project is built for fast triage, not experiment replacement. It is most us
 
 Healthy checkpoint vs a checkpoint with a frozen encoder:
 
-![Healthy vs frozen encoder showcase](docs/showcase/healthy_vs_frozen_encoder.svg)
-
-The showcase above is generated from real report files committed in this repository.
-
 Healthy plasticity probe output:
 
 ```text

@@ -128,7 +128,6 @@ class TorchIntegrationTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             outputs = generate_showcase(temp_dir)
-            self.assertTrue(outputs["comparison_svg"].exists())
             self.assertTrue(outputs["healthy_probe_json"].exists())
             self.assertTrue(outputs["frozen_probe_json"].exists())
             self.assertTrue(outputs["healthy_probe_html"].exists())
