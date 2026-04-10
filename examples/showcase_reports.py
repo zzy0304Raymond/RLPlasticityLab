@@ -49,30 +49,46 @@ def _headline_metrics(report) -> dict[str, str]:
 
 
 def _render_comparison_svg(healthy_report, frozen_report, output_path: Path) -> None:
-    healthy = _headline_metrics(healthy_report)
-    frozen = _headline_metrics(frozen_report)
+    def _metric_value(report, name: str) -> float:
+        metric = report.metrics.get(name)
+        return float(metric.value) if metric is not None else 0.0
 
-    def _lines(x: int, y: int, title: str, values: list[str], accent: str) -> str:
-        parts = [
-            f"<text x='{x}' y='{y}' font-size='24' font-weight='700' fill='#1f1d1a'>{title}</text>",
-        ]
-        current_y = y + 36
-        for value in values:
-            safe = (
-                value.replace("&", "&amp;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
+    healthy_scores = {
+        "Encoder": _metric_value(healthy_report, "encoder_plasticity_score"),
+        "Trunk": _metric_value(healthy_report, "trunk_plasticity_score"),
+        "Policy": _metric_value(healthy_report, "policy_plasticity_score"),
+    }
+    frozen_scores = {
+        "Encoder": _metric_value(frozen_report, "encoder_plasticity_score"),
+        "Trunk": _metric_value(frozen_report, "trunk_plasticity_score"),
+        "Policy": _metric_value(frozen_report, "policy_plasticity_score"),
+    }
+
+    def _bar_group(x: int, y: int, scores: dict[str, float], accent: str) -> str:
+        parts: list[str] = []
+        current_y = y
+        for label, score in scores.items():
+            width = 220 * max(0.0, min(score, 1.0))
+            value_x = x + 300
+            parts.append(
+                f"<text x='{x}' y='{current_y}' font-size='16' font-weight='600' fill='#2d2924'>{label}</text>"
             )
             parts.append(
-                f"<text x='{x}' y='{current_y}' font-size='16' fill='#3f3a33'>{safe}</text>"
+                f"<rect x='{x}' y='{current_y + 14}' width='220' height='16' rx='8' fill='#eadfce' />"
             )
-            current_y += 28
-        parts.append(
-            f"<rect x='{x}' y='{y + 160}' width='360' height='6' rx='3' fill='{accent}' opacity='0.9' />"
-        )
+            parts.append(
+                f"<rect x='{x}' y='{current_y + 14}' width='{width:.1f}' height='16' rx='8' fill='{accent}' />"
+            )
+            parts.append(
+                f"<text x='{value_x}' y='{current_y + 28}' font-size='15' fill='#5a5147'>{score:.2f}</text>"
+            )
+            current_y += 62
         return "\n".join(parts)
 
-    svg = f"""<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="520" viewBox="0 0 1120 520" role="img" aria-labelledby="title desc">
+    healthy_summary = "No issue detected"
+    frozen_summary = "Encoder bottleneck"
+
+    svg = f"""<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="460" viewBox="0 0 1120 460" role="img" aria-labelledby="title desc">
   <title id="title">RLPlasticity healthy vs frozen-encoder comparison</title>
   <desc id="desc">Side-by-side comparison of healthy and frozen-encoder plasticity probe outputs.</desc>
   <defs>
@@ -81,34 +97,24 @@ def _render_comparison_svg(healthy_report, frozen_report, output_path: Path) -> 
       <stop offset="100%" stop-color="#eee4d4" />
     </linearGradient>
   </defs>
-  <rect width="1120" height="520" fill="url(#bg)" />
-  <text x="60" y="68" font-size="34" font-weight="700" fill="#1f1d1a">RLPlasticity showcase: healthy vs frozen encoder</text>
-  <text x="60" y="104" font-size="18" fill="#5c5448">Both reports are generated from real demo artifacts in this repository.</text>
+  <rect width="1120" height="460" fill="url(#bg)" />
+  <text x="60" y="64" font-size="34" font-weight="700" fill="#1f1d1a">RLPlasticity showcase</text>
+  <text x="60" y="96" font-size="18" fill="#5c5448">Healthy policy vs frozen encoder on the same probe batch</text>
 
-  <rect x="60" y="140" width="470" height="320" rx="24" fill="#fffdf8" stroke="#d7cbbd" />
-  <rect x="590" y="140" width="470" height="320" rx="24" fill="#fffdf8" stroke="#d7cbbd" />
+  <rect x="60" y="128" width="470" height="280" rx="24" fill="#fffdf8" stroke="#d7cbbd" />
+  <rect x="590" y="128" width="470" height="280" rx="24" fill="#fffdf8" stroke="#d7cbbd" />
 
-  <text x="88" y="182" font-size="18" font-weight="700" fill="#0d6b57">Healthy checkpoint</text>
-  {_lines(88, 220, "Probe result", [
-        healthy["summary"],
-        healthy["plasticity_score"],
-        healthy["stagnant_layer_fraction"],
-        healthy["encoder_plasticity_score"],
-        healthy["trunk_plasticity_score"],
-        healthy["policy_plasticity_score"],
-        healthy["findings"],
-    ], "#0d6b57")}
+  <text x="90" y="172" font-size="24" font-weight="700" fill="#0d6b57">Healthy</text>
+  <rect x="360" y="148" width="130" height="34" rx="17" fill="#dff4eb" />
+  <text x="383" y="171" font-size="15" font-weight="700" fill="#0d6b57">{healthy_summary}</text>
+  {_bar_group(90, 220, healthy_scores, "#0d6b57")}
 
-  <text x="618" y="182" font-size="18" font-weight="700" fill="#b53d23">Frozen encoder</text>
-  {_lines(618, 220, "Probe result", [
-        frozen["summary"],
-        frozen["plasticity_score"],
-        frozen["stagnant_layer_fraction"],
-        frozen["encoder_plasticity_score"],
-        frozen["trunk_plasticity_score"],
-        frozen["policy_plasticity_score"],
-        frozen["findings"],
-    ], "#b53d23")}
+  <text x="620" y="172" font-size="24" font-weight="700" fill="#b53d23">Frozen encoder</text>
+  <rect x="880" y="148" width="140" height="34" rx="17" fill="#f7ddd6" />
+  <text x="901" y="171" font-size="15" font-weight="700" fill="#b53d23">{frozen_summary}</text>
+  {_bar_group(620, 220, frozen_scores, "#b53d23")}
+
+  <text x="60" y="438" font-size="15" fill="#6a6054">Generated from real report artifacts committed in this repository.</text>
 </svg>
 """
     output_path.write_text(svg, encoding="utf-8")
