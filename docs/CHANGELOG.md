@@ -24,11 +24,13 @@ The format is inspired by Keep a Changelog and the project follows semantic-vers
   - forward low-response conditions
 - text, JSON, and HTML report rendering
 - realistic demo actor case, sequence artifacts, and generated showcase artifacts
+- PPO-like, DQN-like, and SAC-like example scripts for common RL wiring patterns
 - validation suite covering healthy and intentionally broken cases, including trunk-side failure and checkpoint-sequence history
 - lightweight integration helpers for:
   - raw PyTorch loops
   - CleanRL-style naming
   - SB3-style naming
+- more robust module-group inference to avoid false positives such as `actor` matching `extractor`
 - report schema, troubleshooting guide, and roadmap docs
 - community files:
   - contributing guide

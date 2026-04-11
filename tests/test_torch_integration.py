@@ -250,6 +250,42 @@ class TorchIntegrationTests(unittest.TestCase):
             self.assertIn("global_stall", summary)
             self.assertIn("checkpoint_sequence", summary)
 
+    def test_rl_algorithm_examples_run(self) -> None:
+        env = {**os.environ, "PYTHONPATH": self.pythonpath}
+        commands = [
+            [sys.executable, "-m", "examples.ppo_like_case"],
+            [sys.executable, "-m", "examples.dqn_like_case"],
+        ]
+        for command in commands:
+            process = subprocess.run(
+                command,
+                cwd=self.repo_root,
+                env=env,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(process.returncode, 0, process.stderr)
+            self.assertIn("RLPlasticity Report", process.stdout)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            process = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "examples.sac_like_case",
+                    "--output-dir",
+                    temp_dir,
+                ],
+                cwd=self.repo_root,
+                env=env,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(process.returncode, 0, process.stderr)
+            self.assertIn("Checkpoint Sequence Probe", process.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -9,8 +9,8 @@ def sb3_group_keywords() -> dict[str, list[str]]:
     """Return heuristic group keywords that fit common SB3 policy naming."""
 
     return {
-        "encoder": ["features_extractor", "extractor", "cnn", "mlp_extractor"],
-        "trunk": ["mlp_extractor", "shared_net", "latent"],
+        "encoder": ["features_extractor", "cnn"],
+        "trunk": ["mlp_extractor", "shared_net", "latent", "net"],
         "policy": ["action_net", "policy", "pi", "actor"],
         "value": ["value_net", "critic", "vf", "qf"],
     }

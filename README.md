@@ -411,6 +411,14 @@ print(export_training_sequence_artifacts("reports/demo_sequence"))
 PY
 ```
 
+Common RL-shaped examples:
+
+- PPO-like actor-critic: `python -m examples.ppo_like_case`
+- DQN-like value network: `python -m examples.dqn_like_case`
+- SAC-like actor/critic with checkpoint sequence: `python -m examples.sac_like_case --output-dir reports/demo_sac_sequence`
+
+These examples are framework-independent PyTorch scripts, but they are structured to resemble real PPO / DQN / SAC training code and show how to plug in the helper APIs.
+
 ## What You Get Back
 
 Each report includes:

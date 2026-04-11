@@ -9,6 +9,7 @@ from pathlib import Path
 from rlplasticity import scan_checkpoint
 from rlplasticity.core.aggregation import aggregate_snapshots
 from rlplasticity.core.enums import AnalysisKind, EvidenceLevel
+from rlplasticity.core.naming import infer_module_group
 from rlplasticity.core.types import LayerSnapshot, Snapshot
 from rlplasticity.ingest.checkpoints import extract_state_dict
 from rlplasticity.plasticity.analyzer import create_checkpoint_scan_analyzer
@@ -113,6 +114,17 @@ class RobustnessTests(unittest.TestCase):
 
         self.assertEqual(set(cleanrl_group_keywords()), {"encoder", "trunk", "policy", "value"})
         self.assertEqual(set(sb3_group_keywords()), {"encoder", "trunk", "policy", "value"})
+
+    def test_group_inference_avoids_actor_extractor_false_positive(self) -> None:
+        self.assertEqual(infer_module_group("features_extractor.0"), "encoder")
+        self.assertEqual(
+            infer_module_group("features_extractor.0", {"encoder": ["features_extractor"]}),
+            "encoder",
+        )
+        self.assertEqual(
+            infer_module_group("mlp_extractor.0", {"trunk": ["mlp_extractor"]}),
+            "trunk",
+        )
 
 
 @unittest.skipUnless(torch is not None, "PyTorch is required for robustness integration tests.")
