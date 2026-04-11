@@ -294,3 +294,81 @@ class EncoderDeclineTrendRule(BaseDiagnosticRule):
                 ],
             )
         return None
+
+
+class PlasticityDeclineOnsetRule(BaseDiagnosticRule):
+    name = "plasticity_decline_onset"
+
+    def evaluate(
+        self,
+        snapshot: Snapshot,
+        metrics: dict[str, MetricResult],
+    ) -> DiagnosticFinding | None:
+        trend_metric = metrics.get("plasticity_trend_delta")
+        onset_metric = metrics.get("plasticity_first_decline")
+        if trend_metric is None or onset_metric is None:
+            return None
+        label = onset_metric.metadata.get("first_decline_label")
+        previous_label = onset_metric.metadata.get("previous_label")
+        delta = onset_metric.metadata.get("delta")
+        if label is None or previous_label is None or not isinstance(delta, (float, int)):
+            return None
+        if trend_metric.value < 0.0 and delta < 0.0:
+            return DiagnosticFinding(
+                name=self.name,
+                severity="low",
+                summary=f"The observed plasticity decline appears to start near {label}.",
+                evidence=[
+                    f"first_decline_label={label}",
+                    f"previous_label={previous_label}",
+                    f"first_decline_delta={float(delta):.6f}",
+                ],
+                recommendations=[
+                    "Line up this onset point with optimizer, replay, or data preprocessing changes.",
+                    "Compare logs immediately before and after the onset instead of only the final state.",
+                ],
+            )
+        return None
+
+
+class EarliestLocalizedDeclineRule(BaseDiagnosticRule):
+    name = "localized_decline_leader"
+
+    def evaluate(
+        self,
+        snapshot: Snapshot,
+        metrics: dict[str, MetricResult],
+    ) -> DiagnosticFinding | None:
+        groups = []
+        for group in ("encoder", "trunk", "policy", "value"):
+            if group not in snapshot.by_group():
+                continue
+            metric = metrics.get(f"{group}_plasticity_first_decline")
+            if metric is None:
+                continue
+            index = metric.metadata.get("first_decline_index")
+            label = metric.metadata.get("first_decline_label")
+            delta = metric.metadata.get("delta")
+            if isinstance(index, int) and label is not None and isinstance(delta, (float, int)) and delta < 0.0:
+                groups.append((index, float(delta), group, str(label)))
+
+        if not groups:
+            return None
+
+        groups.sort(key=lambda item: (item[0], item[1]))
+        index, delta, group, label = groups[0]
+        return DiagnosticFinding(
+            name=self.name,
+            severity="low",
+            summary=f"{group} is the earliest module group to show a clear decline in the recorded history.",
+            evidence=[
+                f"group={group}",
+                f"first_decline_label={label}",
+                f"first_decline_index={index}",
+                f"first_decline_delta={delta:.6f}",
+            ],
+            recommendations=[
+                "Inspect this group first when comparing checkpoints or short windows.",
+                "Check whether group-specific learning-rate, normalization, or architecture choices differ from neighboring modules.",
+            ],
+        )

@@ -54,6 +54,56 @@ def _delta_summary(name: str, values: list[float]) -> tuple[float, str, dict[str
     }
 
 
+def _first_decline_summary(
+    name: str,
+    values: list[float],
+    labels: list[str],
+    *,
+    min_decline: float,
+) -> tuple[float, str, dict[str, float | int | str | None]]:
+    if len(values) < 2:
+        return 0.0, f"{name} decline onset unavailable without at least two history points.", {
+            "points": len(values),
+            "first_decline_index": None,
+            "first_decline_label": None,
+            "previous_label": None,
+        }
+
+    for index in range(1, len(values)):
+        delta = values[index] - values[index - 1]
+        if delta <= -min_decline:
+            label = labels[index] if index < len(labels) else f"point-{index + 1}"
+            previous_label = labels[index - 1] if index - 1 < len(labels) else f"point-{index}"
+            return float(index), (
+                f"{name} first decline appears near {label} (delta={delta:.6f} vs {previous_label})"
+            ), {
+                "points": len(values),
+                "first_decline_index": index,
+                "first_decline_label": label,
+                "previous_label": previous_label,
+                "delta": delta,
+            }
+
+    return 0.0, f"{name} decline onset not detected in the recorded history.", {
+        "points": len(values),
+        "first_decline_index": None,
+        "first_decline_label": None,
+        "previous_label": None,
+        "delta": 0.0,
+    }
+
+
+def _history_labels(snapshot: Snapshot) -> list[str]:
+    history = snapshot.metadata.get("history", [])
+    labels: list[str] = []
+    for index, row in enumerate(history):
+        if isinstance(row, dict) and isinstance(row.get("label"), str):
+            labels.append(row["label"])
+        else:
+            labels.append(f"point-{index + 1}")
+    return labels
+
+
 class PlasticityScoreMetric(BaseMetric):
     name = "plasticity_score"
 
@@ -200,3 +250,39 @@ class GroupPlasticityTrendDeltaMetric(BaseMetric):
         values = _history_group_values(snapshot, self.group, "group_relative_update")
         delta, summary, metadata = _delta_summary(f"{self.group} plasticity", values)
         return MetricResult(self.name, delta, summary, metadata=metadata)
+
+
+class PlasticityFirstDeclineMetric(BaseMetric):
+    name = "plasticity_first_decline"
+
+    def __init__(self, *, min_decline: float = 1e-4) -> None:
+        self.min_decline = min_decline
+
+    def compute(self, snapshot: Snapshot) -> MetricResult:
+        values = _history_values(snapshot, "mean_relative_update")
+        labels = _history_labels(snapshot)
+        value, summary, metadata = _first_decline_summary(
+            "Plasticity",
+            values,
+            labels,
+            min_decline=self.min_decline,
+        )
+        return MetricResult(self.name, value, summary, metadata=metadata)
+
+
+class GroupPlasticityFirstDeclineMetric(BaseMetric):
+    def __init__(self, group: str, *, min_decline: float = 1e-4) -> None:
+        self.group = group
+        self.min_decline = min_decline
+        self.name = f"{group}_plasticity_first_decline"
+
+    def compute(self, snapshot: Snapshot) -> MetricResult:
+        values = _history_group_values(snapshot, self.group, "group_relative_update")
+        labels = _history_labels(snapshot)
+        value, summary, metadata = _first_decline_summary(
+            f"{self.group} plasticity",
+            values,
+            labels,
+            min_decline=self.min_decline,
+        )
+        return MetricResult(self.name, value, summary, metadata=metadata)

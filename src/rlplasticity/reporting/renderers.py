@@ -54,6 +54,20 @@ def _history_rows(report: AnalysisReport) -> list[dict[str, object]]:
     return [row for row in history if isinstance(row, dict)]
 
 
+def _visible_metrics(report: AnalysisReport):
+    hidden_markers = (
+        "trend unavailable without at least two history points",
+        "decline onset unavailable without at least two history points",
+    )
+    visible = []
+    for metric in report.metrics.values():
+        lowered = metric.summary.lower()
+        if any(marker in lowered for marker in hidden_markers):
+            continue
+        visible.append(metric)
+    return visible
+
+
 def render_report_text(report: AnalysisReport) -> str:
     lines = []
     lines.append(
@@ -69,7 +83,7 @@ def render_report_text(report: AnalysisReport) -> str:
 
     lines.append("")
     lines.append("Metrics")
-    for metric in report.metrics.values():
+    for metric in _visible_metrics(report):
         lines.append(f"- {metric.summary}")
 
     lines.append("")
@@ -145,7 +159,7 @@ def render_report_html(report: AnalysisReport) -> str:
 
     metric_items = "".join(
         f"<li><strong>{escape(metric.name)}</strong>: {escape(metric.summary)}</li>"
-        for metric in report.metrics.values()
+        for metric in _visible_metrics(report)
     )
     caveat_items = "".join(f"<li>{escape(caveat)}</li>" for caveat in report.caveats)
     history_items = "".join(

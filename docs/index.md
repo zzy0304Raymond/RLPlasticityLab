@@ -130,6 +130,12 @@ The repository also supports:
 
 These workflows are useful when you care about trend, not just a single point estimate.
 
+When history is available, the current report stack can also highlight:
+
+- whether decline is present at all
+- which module group declines earliest
+- roughly where the first clear decline becomes visible in the recorded history
+
 ## Example Workflow
 
 ### Python API

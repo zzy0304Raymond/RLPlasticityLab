@@ -13,18 +13,22 @@ from rlplasticity.plasticity.forward import (
     WidespreadInactiveActivationRule,
 )
 from rlplasticity.plasticity.metrics import (
+    GroupPlasticityFirstDeclineMetric,
     GroupPlasticityMetric,
     GroupPlasticityTrendDeltaMetric,
     MeanActivationShiftMetric,
+    PlasticityFirstDeclineMetric,
     PlasticityScoreMetric,
     PlasticityTrendDeltaMetric,
     StagnantLayerFractionMetric,
 )
 from rlplasticity.plasticity.rules import (
+    EarliestLocalizedDeclineRule,
     EncoderDeclineTrendRule,
     EncoderBottleneckRule,
     GlobalPlasticityStallRule,
     HeadSaturationRule,
+    PlasticityDeclineOnsetRule,
     PlasticityDeclineTrendRule,
     RepresentationChurnRule,
     TrunkBottleneckRule,
@@ -84,9 +88,14 @@ def create_default_plasticity_analyzer() -> PlasticityAnalyzer:
         GroupPlasticityMetric("value"),
         MeanActivationShiftMetric(),
         PlasticityTrendDeltaMetric(),
+        PlasticityFirstDeclineMetric(),
         GroupPlasticityTrendDeltaMetric("encoder"),
+        GroupPlasticityFirstDeclineMetric("encoder"),
         GroupPlasticityTrendDeltaMetric("trunk"),
+        GroupPlasticityFirstDeclineMetric("trunk"),
         GroupPlasticityTrendDeltaMetric("policy"),
+        GroupPlasticityFirstDeclineMetric("policy"),
+        GroupPlasticityFirstDeclineMetric("value"),
     ]
     rules: list[BaseDiagnosticRule] = [
         GlobalPlasticityStallRule(),
@@ -95,7 +104,9 @@ def create_default_plasticity_analyzer() -> PlasticityAnalyzer:
         HeadSaturationRule(),
         RepresentationChurnRule(),
         PlasticityDeclineTrendRule(),
+        PlasticityDeclineOnsetRule(),
         EncoderDeclineTrendRule(),
+        EarliestLocalizedDeclineRule(),
     ]
     return PlasticityAnalyzer(
         analyzer_name="plasticity/default",

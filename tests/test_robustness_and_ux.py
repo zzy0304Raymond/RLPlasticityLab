@@ -196,6 +196,7 @@ class PyTorchRobustnessTests(unittest.TestCase):
     def test_pytorch_integration_helpers_return_reports(self) -> None:
         from examples.rl_actor_case import actor_loss, build_actor, build_optimizer, make_batch
         from rlplasticity.integrations.pytorch import probe_training_loop_step, probe_training_window
+        from rlplasticity.integrations.session import BuilderProbeSession, TrainingProbeSession
 
         batch = make_batch()
         model = build_actor()
@@ -221,6 +222,25 @@ class PyTorchRobustnessTests(unittest.TestCase):
             metadata={"integration": "pytorch-window-helper"},
         )
         self.assertEqual(window_report.snapshot.evidence_level.value, "window")
+
+        runtime_model = build_actor()
+        runtime_session = TrainingProbeSession(
+            model=runtime_model,
+            optimizer=build_optimizer(runtime_model),
+            loss_fn=actor_loss,
+            metadata={"integration": "runtime-session"},
+        )
+        step_report = runtime_session.probe_step(batch, metadata={"mode": "step"})
+        self.assertEqual(step_report.snapshot.evidence_level.value, "update")
+
+        builder_session = BuilderProbeSession(
+            model_builder=build_actor,
+            loss_fn=actor_loss,
+            optimizer_builder=build_optimizer,
+            metadata={"integration": "builder-session"},
+        )
+        builder_window = builder_session.probe_window([batch, batch], max_steps=2)
+        self.assertEqual(builder_window.snapshot.evidence_level.value, "window")
 
 
 @unittest.skipUnless(torch is not None, "PyTorch is required for UX integration tests.")

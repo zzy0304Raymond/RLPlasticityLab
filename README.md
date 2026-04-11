@@ -224,6 +224,7 @@ Convenience helpers are also available for:
   - `rlplasticity.integrations.pytorch`
   - `rlplasticity.integrations.cleanrl`
   - `rlplasticity.integrations.sb3`
+  - `rlplasticity.integrations.session`
 
 ## Quick Start
 
@@ -419,6 +420,22 @@ Common RL-shaped examples:
 
 These examples are framework-independent PyTorch scripts, but they are structured to resemble real PPO / DQN / SAC training code and show how to plug in the helper APIs.
 
+Session-style trainer integration:
+
+```python
+from rlplasticity.integrations.session import TrainingProbeSession
+
+session = TrainingProbeSession(
+    model=model,
+    optimizer=optimizer,
+    loss_fn=loss_fn,
+    metadata={"algo": "ppo"},
+)
+
+step_report = session.probe_step(batch)
+window_report = session.probe_window(replay_window, max_steps=8)
+```
+
 ## What You Get Back
 
 Each report includes:
@@ -429,6 +446,7 @@ Each report includes:
 - findings
 - caveats
 - optional history rows for windows and checkpoint sequences
+- trend summaries, including when decline first becomes visible when history is available
 - a shortlist of layers worth checking next
 
 Reports can be rendered as:

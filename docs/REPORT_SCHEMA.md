@@ -114,6 +114,8 @@ Examples:
 - `stagnant_layer_fraction`
 - `encoder_plasticity_score`
 - `plasticity_trend_delta`
+- `plasticity_first_decline`
+- `encoder_plasticity_first_decline`
 
 ## `findings`
 
