@@ -49,6 +49,11 @@ def _choose_layers(report: AnalysisReport) -> list[LayerSnapshot]:
     return report.top_layers_by("parameter_norm", reverse=False)
 
 
+def _history_rows(report: AnalysisReport) -> list[dict[str, object]]:
+    history = report.snapshot.metadata.get("history", [])
+    return [row for row in history if isinstance(row, dict)]
+
+
 def render_report_text(report: AnalysisReport) -> str:
     lines = []
     lines.append(
@@ -84,6 +89,20 @@ def render_report_text(report: AnalysisReport) -> str:
         lines.append("Caveats")
         for caveat in report.caveats:
             lines.append(f"- {caveat}")
+
+    history = _history_rows(report)
+    if history:
+        lines.append("")
+        lines.append("History")
+        for row in history:
+            label = row.get("label", "unlabeled")
+            loss = row.get("loss")
+            mean_relative_update = row.get("mean_relative_update")
+            lines.append(
+                "- "
+                f"{label}: loss={_format_optional(loss) if isinstance(loss, (float, int)) else 'n/a'} "
+                f"mean_rel_update={_format_optional(mean_relative_update, scientific=True) if isinstance(mean_relative_update, (float, int)) else 'n/a'}"
+            )
 
     lines.append("")
     lines.append(_layer_section_title(report))
@@ -129,6 +148,14 @@ def render_report_html(report: AnalysisReport) -> str:
         for metric in report.metrics.values()
     )
     caveat_items = "".join(f"<li>{escape(caveat)}</li>" for caveat in report.caveats)
+    history_items = "".join(
+        "<tr>"
+        f"<td>{escape(str(row.get('label', 'unlabeled')))}</td>"
+        f"<td>{escape(_format_optional(row.get('loss')) if isinstance(row.get('loss'), (float, int)) else 'n/a')}</td>"
+        f"<td>{escape(_format_optional(row.get('mean_relative_update'), scientific=True) if isinstance(row.get('mean_relative_update'), (float, int)) else 'n/a')}</td>"
+        "</tr>"
+        for row in _history_rows(report)
+    )
 
     return f"""<!doctype html>
 <html lang="en">
@@ -209,6 +236,21 @@ def render_report_html(report: AnalysisReport) -> str:
     <section class="card">
       <h2>Caveats</h2>
       <ul>{caveat_items or '<li>No caveats recorded.</li>'}</ul>
+    </section>
+    <section class="card">
+      <h2>History</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Label</th>
+            <th>Loss</th>
+            <th>Mean Relative Update</th>
+          </tr>
+        </thead>
+        <tbody>
+          {history_items or "<tr><td colspan='3'>No history recorded.</td></tr>"}
+        </tbody>
+      </table>
     </section>
     <section class="card">
       <h2>{escape(_layer_section_title(report))}</h2>

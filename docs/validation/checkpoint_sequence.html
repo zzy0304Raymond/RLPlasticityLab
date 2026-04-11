@@ -63,12 +63,12 @@
   <main>
     <section class="card">
       <h1>RLPlasticity Report</h1>
-      <p class="meta">analyzer=plasticity/default | kind=plasticity_probe | evidence=update | layers=3 | loss=1.448103904724121</p>
+      <p class="meta">analyzer=plasticity/default | kind=plasticity_probe | evidence=window | layers=3 | loss=1.4354474544525146</p>
       <p>No acute issue detected. Plasticity score=1.000 (update-active=1.000, grad-active=1.000)</p>
     </section>
     <section class="card">
       <h2>Metrics</h2>
-      <ul><li><strong>plasticity_score</strong>: Plasticity score=1.000 (update-active=1.000, grad-active=1.000)</li><li><strong>stagnant_layer_fraction</strong>: Stagnant layer fraction=0.000</li><li><strong>encoder_plasticity_score</strong>: encoder plasticity score=1.000</li><li><strong>trunk_plasticity_score</strong>: trunk plasticity score=1.000</li><li><strong>policy_plasticity_score</strong>: policy plasticity score=1.000</li><li><strong>value_plasticity_score</strong>: No value layers were captured.</li><li><strong>mean_activation_shift</strong>: Mean activation shift=0.000000</li><li><strong>plasticity_trend_delta</strong>: Plasticity trend unavailable without at least two history points.</li><li><strong>encoder_plasticity_trend_delta</strong>: encoder plasticity trend unavailable without at least two history points.</li><li><strong>trunk_plasticity_trend_delta</strong>: trunk plasticity trend unavailable without at least two history points.</li><li><strong>policy_plasticity_trend_delta</strong>: policy plasticity trend unavailable without at least two history points.</li></ul>
+      <ul><li><strong>plasticity_score</strong>: Plasticity score=1.000 (update-active=1.000, grad-active=1.000)</li><li><strong>stagnant_layer_fraction</strong>: Stagnant layer fraction=0.000</li><li><strong>encoder_plasticity_score</strong>: encoder plasticity score=1.000</li><li><strong>trunk_plasticity_score</strong>: trunk plasticity score=1.000</li><li><strong>policy_plasticity_score</strong>: policy plasticity score=1.000</li><li><strong>value_plasticity_score</strong>: No value layers were captured.</li><li><strong>mean_activation_shift</strong>: Mean activation shift=0.013419</li><li><strong>plasticity_trend_delta</strong>: Plasticity trend delta=-0.000001 across 3 observations</li><li><strong>encoder_plasticity_trend_delta</strong>: encoder plasticity trend delta=0.000001 across 3 observations</li><li><strong>trunk_plasticity_trend_delta</strong>: trunk plasticity trend delta=-0.000003 across 3 observations</li><li><strong>policy_plasticity_trend_delta</strong>: policy plasticity trend delta=-0.000001 across 3 observations</li></ul>
     </section>
     <section class="card">
       <h2>Findings</h2>
@@ -76,7 +76,7 @@
     </section>
     <section class="card">
       <h2>Caveats</h2>
-      <ul><li>This is a low-cost plasticity probe, not a full experiment. Treat the result as ranked evidence for where to investigate next.</li></ul>
+      <ul><li>This is a low-cost plasticity probe, not a full experiment. Treat the result as ranked evidence for where to investigate next.</li><li>This report averages 2 probe steps; inspect per-step results if the signal looks unstable.</li><li>This report averages 3 checkpoints. Use the history section to inspect how plasticity moves across the sequence.</li></ul>
     </section>
     <section class="card">
       <h2>History</h2>
@@ -89,7 +89,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr><td colspan='3'>No history recorded.</td></tr>
+          <tr><td>actor_step_1.pt</td><td>1.437510</td><td>2.195389e-03</td></tr><tr><td>actor_step_2.pt</td><td>1.435367</td><td>2.193821e-03</td></tr><tr><td>actor_step_3.pt</td><td>1.433466</td><td>2.194451e-03</td></tr>
         </tbody>
       </table>
     </section>
@@ -106,7 +106,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr><td>encoder.0</td><td>encoder</td><td>1.518165e-03</td><td>5.646414e-01</td><td>3.353458e+00</td></tr><tr><td>trunk.0</td><td>trunk</td><td>2.859658e-03</td><td>2.850277e-01</td><td>3.409045e+00</td></tr><tr><td>policy_head</td><td>policy</td><td>2.938991e-03</td><td>9.427109e-02</td><td>1.172762e+00</td></tr>
+          <tr><td>encoder.0</td><td>encoder</td><td>1.346831e-03</td><td>5.663087e-01</td><td>3.353783e+00</td></tr><tr><td>trunk.0</td><td>trunk</td><td>2.568133e-03</td><td>2.907097e-01</td><td>3.409050e+00</td></tr><tr><td>policy_head</td><td>policy</td><td>2.668698e-03</td><td>9.201188e-02</td><td>1.172857e+00</td></tr>
         </tbody>
       </table>
     </section>

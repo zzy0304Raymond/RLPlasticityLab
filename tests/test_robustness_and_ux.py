@@ -107,6 +107,13 @@ class RobustnessTests(unittest.TestCase):
         self.assertEqual(aggregated.metadata["window_size"], 2)
         self.assertAlmostEqual(aggregated.loss, 2.0)
 
+    def test_integration_keyword_helpers_cover_expected_groups(self) -> None:
+        from rlplasticity.integrations.cleanrl import cleanrl_group_keywords
+        from rlplasticity.integrations.sb3 import sb3_group_keywords
+
+        self.assertEqual(set(cleanrl_group_keywords()), {"encoder", "trunk", "policy", "value"})
+        self.assertEqual(set(sb3_group_keywords()), {"encoder", "trunk", "policy", "value"})
+
 
 @unittest.skipUnless(torch is not None, "PyTorch is required for robustness integration tests.")
 class PyTorchRobustnessTests(unittest.TestCase):
@@ -173,6 +180,35 @@ class PyTorchRobustnessTests(unittest.TestCase):
 
         finding_names = {finding.name for finding in report.findings}
         self.assertIn("global_plasticity_stall", finding_names)
+
+    def test_pytorch_integration_helpers_return_reports(self) -> None:
+        from examples.rl_actor_case import actor_loss, build_actor, build_optimizer, make_batch
+        from rlplasticity.integrations.pytorch import probe_training_loop_step, probe_training_window
+
+        batch = make_batch()
+        model = build_actor()
+        optimizer = build_optimizer(model)
+
+        step_report = probe_training_loop_step(
+            model,
+            batch,
+            loss_fn=actor_loss,
+            optimizer=optimizer,
+            metadata={"integration": "pytorch-helper"},
+        )
+        self.assertEqual(step_report.snapshot.evidence_level.value, "update")
+
+        window_model = build_actor()
+        window_optimizer = build_optimizer(window_model)
+        window_report = probe_training_window(
+            window_model,
+            [batch, batch],
+            loss_fn=actor_loss,
+            optimizer=window_optimizer,
+            max_steps=2,
+            metadata={"integration": "pytorch-window-helper"},
+        )
+        self.assertEqual(window_report.snapshot.evidence_level.value, "window")
 
 
 @unittest.skipUnless(torch is not None, "PyTorch is required for UX integration tests.")

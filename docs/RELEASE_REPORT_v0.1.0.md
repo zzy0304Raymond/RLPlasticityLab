@@ -13,6 +13,8 @@ The release focuses on one narrow but practical problem:
 - `scan_checkpoint`
 - `probe_model`
 - `probe_plasticity`
+- `probe_plasticity_window`
+- `probe_checkpoint_sequence`
 
 ## Intended User Value
 
@@ -28,8 +30,10 @@ The current validation set covers:
 
 - healthy baseline
 - frozen encoder
+- frozen trunk
 - frozen policy head
 - global stall
+- checkpoint sequence history generation
 
 Artifacts:
 
@@ -42,9 +46,12 @@ The release includes:
 
 - public Python APIs
 - CLI entry points
+- builder-based and training-step convenience APIs
+- lightweight integration helpers for raw PyTorch, CleanRL-style, and SB3-style codebases
 - tests for logic, robustness, and PyTorch integration
 - community files and issue templates
 - changelog
+- report schema and troubleshooting docs
 - release checklist
 
 ## Known Limitations

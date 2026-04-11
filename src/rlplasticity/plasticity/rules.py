@@ -135,6 +135,50 @@ class HeadSaturationRule(BaseDiagnosticRule):
         return None
 
 
+class TrunkBottleneckRule(BaseDiagnosticRule):
+    name = "trunk_bottleneck"
+
+    def __init__(self, *, min_gap: float = 0.25) -> None:
+        self.min_gap = min_gap
+
+    def evaluate(
+        self,
+        snapshot: Snapshot,
+        metrics: dict[str, MetricResult],
+    ) -> DiagnosticFinding | None:
+        groups = snapshot.by_group()
+        if "trunk" not in groups:
+            return None
+
+        trunk_score = _metric_value(metrics, "trunk_plasticity_score")
+        encoder_score = _metric_value(metrics, "encoder_plasticity_score")
+        policy_score = _metric_value(metrics, "policy_plasticity_score")
+        candidates = [
+            value
+            for name, value in [("encoder", encoder_score), ("policy", policy_score)]
+            if name in groups and value is not None
+        ]
+        if trunk_score is None or not candidates:
+            return None
+        reference = max(candidates)
+        if reference - trunk_score >= self.min_gap:
+            return DiagnosticFinding(
+                name=self.name,
+                severity="medium",
+                summary="The shared trunk is adapting less than surrounding modules.",
+                evidence=[
+                    f"trunk_plasticity_score={trunk_score:.3f}",
+                    f"reference_neighbor_score={reference:.3f}",
+                ],
+                recommendations=[
+                    "Inspect whether the shared trunk is over-regularized or blocked by normalization settings.",
+                    "Compare encoder and head gradients against trunk gradients across several nearby steps.",
+                    "Check whether trunk activations are saturating before the output heads.",
+                ],
+            )
+        return None
+
+
 class RepresentationChurnRule(BaseDiagnosticRule):
     name = "representation_churn"
 
@@ -169,6 +213,84 @@ class RepresentationChurnRule(BaseDiagnosticRule):
                 recommendations=[
                     "Cross-check reward variance, target-network lag, or bootstrap instability before blaming plasticity loss.",
                     "Compare this step with a short rolling window to see whether activation churn is persistent.",
+                ],
+            )
+        return None
+
+
+class PlasticityDeclineTrendRule(BaseDiagnosticRule):
+    name = "plasticity_decline_trend"
+
+    def __init__(self, *, min_decline: float = 1e-4, min_points: int = 2) -> None:
+        self.min_decline = min_decline
+        self.min_points = min_points
+
+    def evaluate(
+        self,
+        snapshot: Snapshot,
+        metrics: dict[str, MetricResult],
+    ) -> DiagnosticFinding | None:
+        metric = metrics.get("plasticity_trend_delta")
+        if metric is None or metric.metadata.get("points", 0) < self.min_points:
+            return None
+        if metric.value <= -self.min_decline:
+            return DiagnosticFinding(
+                name=self.name,
+                severity="medium",
+                summary="Plasticity is declining across the observed window or checkpoint sequence.",
+                evidence=[
+                    f"plasticity_trend_delta={metric.value:.6f}",
+                    f"history_points={metric.metadata.get('points')}",
+                ],
+                recommendations=[
+                    "Inspect when the decline begins rather than treating the final checkpoint in isolation.",
+                    "Compare learning-rate, normalization, and replay changes around the first degraded history point.",
+                    "Keep the history JSON so you can line up model-side decline with training logs.",
+                ],
+            )
+        return None
+
+
+class EncoderDeclineTrendRule(BaseDiagnosticRule):
+    name = "encoder_decline_trend"
+
+    def __init__(self, *, min_decline_gap: float = 1e-4, min_points: int = 2) -> None:
+        self.min_decline_gap = min_decline_gap
+        self.min_points = min_points
+
+    def evaluate(
+        self,
+        snapshot: Snapshot,
+        metrics: dict[str, MetricResult],
+    ) -> DiagnosticFinding | None:
+        if "encoder" not in snapshot.by_group():
+            return None
+        encoder_metric = metrics.get("encoder_plasticity_trend_delta")
+        trunk_metric = metrics.get("trunk_plasticity_trend_delta")
+        policy_metric = metrics.get("policy_plasticity_trend_delta")
+        if encoder_metric is None or encoder_metric.metadata.get("points", 0) < self.min_points:
+            return None
+        references = [
+            value
+            for metric in [trunk_metric, policy_metric]
+            if metric is not None and metric.metadata.get("points", 0) >= self.min_points
+            for value in [metric.value]
+        ]
+        if not references:
+            return None
+        reference = max(references)
+        if encoder_metric.value + self.min_decline_gap < reference:
+            return DiagnosticFinding(
+                name=self.name,
+                severity="medium",
+                summary="Encoder plasticity is declining faster than downstream modules over the observed history.",
+                evidence=[
+                    f"encoder_plasticity_trend_delta={encoder_metric.value:.6f}",
+                    f"reference_downstream_trend_delta={reference:.6f}",
+                ],
+                recommendations=[
+                    "Inspect whether encoder-specific updates collapse earlier than trunk or head updates.",
+                    "Check preprocessing, augmentation, and encoder optimizer settings around the onset of decline.",
                 ],
             )
         return None

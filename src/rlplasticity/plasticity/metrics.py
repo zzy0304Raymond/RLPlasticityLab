@@ -16,6 +16,44 @@ def _nonnull(values):
     return [value for value in values if value is not None]
 
 
+def _history_values(snapshot: Snapshot, key: str) -> list[float]:
+    history = snapshot.metadata.get("history", [])
+    values = []
+    for row in history:
+        if not isinstance(row, dict):
+            continue
+        value = row.get(key)
+        if isinstance(value, (float, int)):
+            values.append(float(value))
+    return values
+
+
+def _history_group_values(snapshot: Snapshot, group: str, key: str) -> list[float]:
+    history = snapshot.metadata.get("history", [])
+    values = []
+    for row in history:
+        if not isinstance(row, dict):
+            continue
+        grouped = row.get(key)
+        if not isinstance(grouped, dict):
+            continue
+        value = grouped.get(group)
+        if isinstance(value, (float, int)):
+            values.append(float(value))
+    return values
+
+
+def _delta_summary(name: str, values: list[float]) -> tuple[float, str, dict[str, float | int | None]]:
+    if len(values) < 2:
+        return 0.0, f"{name} trend unavailable without at least two history points.", {"points": len(values), "start": None, "end": None}
+    delta = values[-1] - values[0]
+    return delta, f"{name} trend delta={delta:.6f} across {len(values)} observations", {
+        "points": len(values),
+        "start": values[0],
+        "end": values[-1],
+    }
+
+
 class PlasticityScoreMetric(BaseMetric):
     name = "plasticity_score"
 
@@ -142,3 +180,23 @@ class MeanActivationShiftMetric(BaseMetric):
             f"Mean activation shift={value:.6f}",
             metadata={"samples": len(shifts)},
         )
+
+
+class PlasticityTrendDeltaMetric(BaseMetric):
+    name = "plasticity_trend_delta"
+
+    def compute(self, snapshot: Snapshot) -> MetricResult:
+        values = _history_values(snapshot, "mean_relative_update")
+        delta, summary, metadata = _delta_summary("Plasticity", values)
+        return MetricResult(self.name, delta, summary, metadata=metadata)
+
+
+class GroupPlasticityTrendDeltaMetric(BaseMetric):
+    def __init__(self, group: str) -> None:
+        self.group = group
+        self.name = f"{group}_plasticity_trend_delta"
+
+    def compute(self, snapshot: Snapshot) -> MetricResult:
+        values = _history_group_values(snapshot, self.group, "group_relative_update")
+        delta, summary, metadata = _delta_summary(f"{self.group} plasticity", values)
+        return MetricResult(self.name, delta, summary, metadata=metadata)

@@ -1,0 +1,258 @@
+{
+  "analyzer_name": "plasticity/default",
+  "snapshot": {
+    "kind": "plasticity_probe",
+    "evidence_level": "window",
+    "step": 1,
+    "loss": 1.4354474544525146,
+    "layers": [
+      {
+        "name": "encoder.0",
+        "group": "encoder",
+        "module_type": "Linear",
+        "parameter_count": 288,
+        "parameter_norm": 3.3537827730178833,
+        "parameter_mean_abs": 0.16980235278606415,
+        "parameter_zero_fraction": 0.0,
+        "parameter_max_abs": 0.35423525671164197,
+        "gradient_norm": 0.11859608814120293,
+        "update_norm": 0.004516958879927794,
+        "relative_update": 0.0013468305204340366,
+        "grad_to_weight_ratio": 0.03536187770809661,
+        "activation_mean": -0.053008111814657845,
+        "activation_std": 0.56630872686704,
+        "activation_shift": 0.007844537496566772,
+        "zero_activation_fraction": 0.0,
+        "max_activation_abs": 1.9274466037750244,
+        "metadata": {}
+      },
+      {
+        "name": "trunk.0",
+        "group": "trunk",
+        "module_type": "Linear",
+        "parameter_count": 1056,
+        "parameter_norm": 3.409050186475118,
+        "parameter_mean_abs": 0.09177222723762195,
+        "parameter_zero_fraction": 0.0,
+        "parameter_max_abs": 0.1775784989198049,
+        "gradient_norm": 0.2508256534735362,
+        "update_norm": 0.00875488754051427,
+        "relative_update": 0.0025681326535099843,
+        "grad_to_weight_ratio": 0.07357641793033237,
+        "activation_mean": -0.008967020316049457,
+        "activation_std": 0.2907097240289052,
+        "activation_shift": 0.018915315934767325,
+        "zero_activation_fraction": 0.0,
+        "max_activation_abs": 0.9667532245318095,
+        "metadata": {}
+      },
+      {
+        "name": "policy_head",
+        "group": "policy",
+        "module_type": "Linear",
+        "parameter_count": 132,
+        "parameter_norm": 1.1728565295537312,
+        "parameter_mean_abs": 0.08844381819168727,
+        "parameter_zero_fraction": 0.0,
+        "parameter_max_abs": 0.17499505231777826,
+        "gradient_norm": 0.30736226340134937,
+        "update_norm": 0.003129990383361777,
+        "relative_update": 0.0026686975023699614,
+        "grad_to_weight_ratio": 0.26206180705524745,
+        "activation_mean": 0.02498605257521073,
+        "activation_std": 0.0920118826131026,
+        "activation_shift": 0.013497709607084593,
+        "zero_activation_fraction": 0.0,
+        "max_activation_abs": 0.287061408162117,
+        "metadata": {}
+      }
+    ],
+    "metadata": {
+      "validation_case": "checkpoint_sequence",
+      "checkpoint_label": "actor_step_1.pt",
+      "demo_accuracy": 0.25,
+      "cross_entropy": 1.380826711654663,
+      "window_size": 3,
+      "loss_mean": 1.4354474544525146,
+      "history": [
+        {
+          "label": "actor_step_1.pt",
+          "step": 1,
+          "loss": 1.437510073184967,
+          "mean_relative_update": 0.002195389067300054,
+          "mean_grad_to_weight_ratio": 0.12377738396010357,
+          "group_relative_update": {
+            "encoder": 0.0013469497666748248,
+            "trunk": 0.0025698667477178296,
+            "policy": 0.0026693506875075075
+          },
+          "group_grad_to_weight_ratio": {
+            "encoder": 0.03527341811821369,
+            "trunk": 0.07355153191685024,
+            "policy": 0.2625072018452468
+          },
+          "layer_count": 3
+        },
+        {
+          "label": "actor_step_2.pt",
+          "step": 1,
+          "loss": 1.4353667497634888,
+          "mean_relative_update": 0.0021938205081360137,
+          "mean_grad_to_weight_ratio": 0.1235777522923028,
+          "group_relative_update": {
+            "encoder": 0.0013453927752755316,
+            "trunk": 0.002567395197923121,
+            "policy": 0.002668673551209388
+          },
+          "group_grad_to_weight_ratio": {
+            "encoder": 0.035307563574465406,
+            "trunk": 0.07338887497687771,
+            "policy": 0.2620368183255653
+          },
+          "layer_count": 3
+        },
+        {
+          "label": "actor_step_3.pt",
+          "step": 1,
+          "loss": 1.4334655404090881,
+          "mean_relative_update": 0.002194451100877915,
+          "mean_grad_to_weight_ratio": 0.12364496644127006,
+          "group_relative_update": {
+            "encoder": 0.0013481490193517531,
+            "trunk": 0.0025671360148890026,
+            "policy": 0.0026680682683929893
+          },
+          "group_grad_to_weight_ratio": {
+            "encoder": 0.03550465143161073,
+            "trunk": 0.07378884689726917,
+            "policy": 0.2616414009949303
+          },
+          "layer_count": 3
+        }
+      ],
+      "aggregation_mode": "checkpoint_sequence",
+      "sequence_length": 3,
+      "checkpoint_labels": [
+        "actor_step_1.pt",
+        "actor_step_2.pt",
+        "actor_step_3.pt"
+      ]
+    },
+    "caveats": [
+      "This is a low-cost plasticity probe, not a full experiment. Treat the result as ranked evidence for where to investigate next.",
+      "This report averages 2 probe steps; inspect per-step results if the signal looks unstable.",
+      "This report averages 3 checkpoints. Use the history section to inspect how plasticity moves across the sequence."
+    ]
+  },
+  "metrics": {
+    "plasticity_score": {
+      "name": "plasticity_score",
+      "value": 1.0,
+      "summary": "Plasticity score=1.000 (update-active=1.000, grad-active=1.000)",
+      "metadata": {
+        "update_active_fraction": 1.0,
+        "grad_active_fraction": 1.0,
+        "activation_health": 1.0
+      }
+    },
+    "stagnant_layer_fraction": {
+      "name": "stagnant_layer_fraction",
+      "value": 0.0,
+      "summary": "Stagnant layer fraction=0.000",
+      "metadata": {
+        "stagnant_layers": [],
+        "eligible_layers": 3
+      }
+    },
+    "encoder_plasticity_score": {
+      "name": "encoder_plasticity_score",
+      "value": 1.0,
+      "summary": "encoder plasticity score=1.000",
+      "metadata": {
+        "layer_count": 1,
+        "mean_relative_update": 0.0013468305204340366,
+        "mean_grad_to_weight_ratio": 0.03536187770809661
+      }
+    },
+    "trunk_plasticity_score": {
+      "name": "trunk_plasticity_score",
+      "value": 1.0,
+      "summary": "trunk plasticity score=1.000",
+      "metadata": {
+        "layer_count": 1,
+        "mean_relative_update": 0.0025681326535099843,
+        "mean_grad_to_weight_ratio": 0.07357641793033237
+      }
+    },
+    "policy_plasticity_score": {
+      "name": "policy_plasticity_score",
+      "value": 1.0,
+      "summary": "policy plasticity score=1.000",
+      "metadata": {
+        "layer_count": 1,
+        "mean_relative_update": 0.0026686975023699614,
+        "mean_grad_to_weight_ratio": 0.26206180705524745
+      }
+    },
+    "value_plasticity_score": {
+      "name": "value_plasticity_score",
+      "value": 0.0,
+      "summary": "No value layers were captured.",
+      "metadata": {}
+    },
+    "mean_activation_shift": {
+      "name": "mean_activation_shift",
+      "value": 0.013419187679472897,
+      "summary": "Mean activation shift=0.013419",
+      "metadata": {
+        "samples": 3
+      }
+    },
+    "plasticity_trend_delta": {
+      "name": "plasticity_trend_delta",
+      "value": -9.379664221388292e-07,
+      "summary": "Plasticity trend delta=-0.000001 across 3 observations",
+      "metadata": {
+        "points": 3,
+        "start": 0.002195389067300054,
+        "end": 0.002194451100877915
+      }
+    },
+    "encoder_plasticity_trend_delta": {
+      "name": "encoder_plasticity_trend_delta",
+      "value": 1.1992526769283307e-06,
+      "summary": "encoder plasticity trend delta=0.000001 across 3 observations",
+      "metadata": {
+        "points": 3,
+        "start": 0.0013469497666748248,
+        "end": 0.0013481490193517531
+      }
+    },
+    "trunk_plasticity_trend_delta": {
+      "name": "trunk_plasticity_trend_delta",
+      "value": -2.7307328288269685e-06,
+      "summary": "trunk plasticity trend delta=-0.000003 across 3 observations",
+      "metadata": {
+        "points": 3,
+        "start": 0.0025698667477178296,
+        "end": 0.0025671360148890026
+      }
+    },
+    "policy_plasticity_trend_delta": {
+      "name": "policy_plasticity_trend_delta",
+      "value": -1.2824191145182837e-06,
+      "summary": "policy plasticity trend delta=-0.000001 across 3 observations",
+      "metadata": {
+        "points": 3,
+        "start": 0.0026693506875075075,
+        "end": 0.0026680682683929893
+      }
+    }
+  },
+  "findings": [],
+  "caveats": [
+    "This is a low-cost plasticity probe, not a full experiment. Treat the result as ranked evidence for where to investigate next.",
+    "This report averages 2 probe steps; inspect per-step results if the signal looks unstable.",
+    "This report averages 3 checkpoints. Use the history section to inspect how plasticity moves across the sequence."
+  ]
+}

@@ -152,6 +152,96 @@ class AnalyzerTests(unittest.TestCase):
         report = analyzer.analyze(snapshot)
         self.assertTrue(any(finding.name == "encoder_low_response" for finding in report.findings))
 
+    def test_trunk_bottleneck_is_detected(self) -> None:
+        analyzer = create_default_plasticity_analyzer()
+        snapshot = Snapshot(
+            kind=AnalysisKind.PLASTICITY_PROBE,
+            evidence_level=EvidenceLevel.UPDATE,
+            step=4,
+            loss=0.8,
+            layers=[
+                LayerSnapshot(
+                    name="encoder.linear",
+                    group="encoder",
+                    module_type="Linear",
+                    parameter_count=10,
+                    parameter_norm=1.0,
+                    parameter_mean_abs=0.1,
+                    gradient_norm=0.3,
+                    update_norm=0.01,
+                    relative_update=1e-3,
+                    grad_to_weight_ratio=1e-2,
+                ),
+                LayerSnapshot(
+                    name="trunk.linear",
+                    group="trunk",
+                    module_type="Linear",
+                    parameter_count=10,
+                    parameter_norm=1.0,
+                    parameter_mean_abs=0.1,
+                    gradient_norm=0.0,
+                    update_norm=0.0,
+                    relative_update=0.0,
+                    grad_to_weight_ratio=0.0,
+                ),
+                LayerSnapshot(
+                    name="policy_head",
+                    group="policy",
+                    module_type="Linear",
+                    parameter_count=10,
+                    parameter_norm=1.0,
+                    parameter_mean_abs=0.1,
+                    gradient_norm=0.2,
+                    update_norm=0.01,
+                    relative_update=1e-3,
+                    grad_to_weight_ratio=1e-2,
+                ),
+            ],
+        )
+        report = analyzer.analyze(snapshot)
+        self.assertTrue(any(finding.name == "trunk_bottleneck" for finding in report.findings))
+
+    def test_trend_decline_is_detected(self) -> None:
+        analyzer = create_default_plasticity_analyzer()
+        snapshot = Snapshot(
+            kind=AnalysisKind.PLASTICITY_PROBE,
+            evidence_level=EvidenceLevel.WINDOW,
+            step=3,
+            loss=1.0,
+            layers=[
+                LayerSnapshot(
+                    name="encoder.linear",
+                    group="encoder",
+                    module_type="Linear",
+                    parameter_count=10,
+                    parameter_norm=1.0,
+                    parameter_mean_abs=0.1,
+                    gradient_norm=0.01,
+                    update_norm=0.001,
+                    relative_update=1e-4,
+                    grad_to_weight_ratio=1e-4,
+                )
+            ],
+            metadata={
+                "history": [
+                    {
+                        "label": "checkpoint-1",
+                        "mean_relative_update": 5e-3,
+                        "group_relative_update": {"encoder": 5e-3, "trunk": 5e-3, "policy": 5e-3},
+                    },
+                    {
+                        "label": "checkpoint-2",
+                        "mean_relative_update": 1e-3,
+                        "group_relative_update": {"encoder": 5e-5, "trunk": 8e-4, "policy": 1e-3},
+                    },
+                ]
+            },
+        )
+        report = analyzer.analyze(snapshot)
+        finding_names = {finding.name for finding in report.findings}
+        self.assertIn("plasticity_decline_trend", finding_names)
+        self.assertIn("encoder_decline_trend", finding_names)
+
 
 class WorkflowTests(unittest.TestCase):
     def test_scan_checkpoint_uses_static_mode(self) -> None:

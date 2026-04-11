@@ -10,6 +10,10 @@ Metrics
 - policy plasticity score=1.000
 - No value layers were captured.
 - Mean activation shift=0.000000
+- Plasticity trend unavailable without at least two history points.
+- encoder plasticity trend unavailable without at least two history points.
+- trunk plasticity trend unavailable without at least two history points.
+- policy plasticity trend unavailable without at least two history points.
 
 Findings
 - [medium/medium] The encoder is adapting less than downstream layers.

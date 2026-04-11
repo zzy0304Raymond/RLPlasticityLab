@@ -18,7 +18,7 @@ def _coerce_loss_result(result: Any) -> tuple[Any, dict[str, Any]]:
     return result, {}
 
 
-def collect_plasticity_probe(
+def collect_plasticity_snapshots(
     model,
     batches,
     *,
@@ -29,7 +29,7 @@ def collect_plasticity_probe(
     max_steps: int | None = None,
     metadata: dict[str, Any] | None = None,
 ):
-    """Run one or more low-cost update probes and aggregate them."""
+    """Run one or more low-cost update probes and return raw per-step snapshots."""
 
     maybe_load_model_checkpoint(model, checkpoint)
     concrete_batches = normalize_batches(batches)
@@ -56,5 +56,32 @@ def collect_plasticity_probe(
             )
     finally:
         monitor.close()
+
+    return snapshots
+
+
+def collect_plasticity_probe(
+    model,
+    batches,
+    *,
+    loss_fn,
+    optimizer,
+    checkpoint: str | dict[str, Any] | None = None,
+    group_keywords: dict[str, list[str]] | None = None,
+    max_steps: int | None = None,
+    metadata: dict[str, Any] | None = None,
+):
+    """Run one or more low-cost update probes and aggregate them."""
+
+    snapshots = collect_plasticity_snapshots(
+        model,
+        batches,
+        loss_fn=loss_fn,
+        optimizer=optimizer,
+        checkpoint=checkpoint,
+        group_keywords=group_keywords,
+        max_steps=max_steps,
+        metadata=metadata,
+    )
 
     return aggregate_snapshots(snapshots)

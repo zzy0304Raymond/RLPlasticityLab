@@ -26,8 +26,20 @@ class TorchIntegrationTests(unittest.TestCase):
         return temp_dir, artifacts
 
     def test_python_api_with_real_checkpoint_and_batch(self) -> None:
-        from examples.rl_actor_case import actor_loss, build_actor, build_optimizer, forward_batch
-        from rlplasticity import probe_model, probe_plasticity, scan_checkpoint
+        from examples.rl_actor_case import (
+            actor_loss,
+            build_actor,
+            build_optimizer,
+            export_training_sequence_artifacts,
+            forward_batch,
+        )
+        from rlplasticity import (
+            probe_checkpoint_sequence,
+            probe_model,
+            probe_plasticity,
+            probe_plasticity_window,
+            scan_checkpoint,
+        )
 
         temp_dir, artifacts = self._prepare_artifacts()
         self.addCleanup(temp_dir.cleanup)
@@ -62,7 +74,40 @@ class TorchIntegrationTests(unittest.TestCase):
         self.assertEqual(plasticity_report.snapshot.evidence_level.value, "update")
         self.assertIn("plasticity_score", plasticity_report.metrics)
 
+        window_model = build_actor()
+        window_optimizer = build_optimizer(window_model)
+        window_report = probe_plasticity_window(
+            window_model,
+            [batch, batch],
+            loss_fn=actor_loss,
+            optimizer=window_optimizer,
+            checkpoint=str(actor_path),
+            max_steps=2,
+            metadata={"integration": "window"},
+        )
+        self.assertEqual(window_report.snapshot.evidence_level.value, "window")
+        self.assertGreaterEqual(len(window_report.snapshot.metadata.get("history", [])), 2)
+
+        sequence_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(sequence_dir.cleanup)
+        sequence_artifacts = export_training_sequence_artifacts(sequence_dir.name, steps=3)
+        sequence_batches = torch.load(sequence_artifacts["batches"], map_location="cpu")
+        sequence_report = probe_checkpoint_sequence(
+            build_actor,
+            [str(path) for path in sequence_artifacts["checkpoints"]],
+            sequence_batches,
+            loss_fn=actor_loss,
+            optimizer_builder=build_optimizer,
+            max_steps=2,
+            metadata={"integration": "sequence"},
+        )
+        self.assertEqual(sequence_report.snapshot.evidence_level.value, "window")
+        self.assertEqual(sequence_report.snapshot.metadata.get("sequence_length"), 3)
+        self.assertGreaterEqual(len(sequence_report.snapshot.metadata.get("history", [])), 3)
+
     def test_cli_probe_model_and_probe_plasticity(self) -> None:
+        from examples.rl_actor_case import export_training_sequence_artifacts
+
         temp_dir, artifacts = self._prepare_artifacts()
         self.addCleanup(temp_dir.cleanup)
 
@@ -123,6 +168,64 @@ class TorchIntegrationTests(unittest.TestCase):
         self.assertIn("kind=plasticity_probe", probe_plasticity_process.stdout)
         self.assertIn("plasticity score", probe_plasticity_process.stdout.lower())
 
+        with tempfile.TemporaryDirectory() as sequence_dir:
+            sequence_artifacts = export_training_sequence_artifacts(sequence_dir, steps=3)
+            probe_window_process = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "rlplasticity.cli",
+                    "probe-window",
+                    "--builder",
+                    "examples.rl_actor_case:build_actor",
+                    "--samples",
+                    str(sequence_artifacts["batches"]),
+                    "--loss",
+                    "examples.rl_actor_case:actor_loss",
+                    "--optimizer",
+                    "examples.rl_actor_case:build_optimizer",
+                    "--checkpoint",
+                    actor_path,
+                    "--max-steps",
+                    "2",
+                ],
+                cwd=self.repo_root,
+                env=env,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(probe_window_process.returncode, 0, probe_window_process.stderr)
+            self.assertIn("History", probe_window_process.stdout)
+
+            sequence_process = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "rlplasticity.cli",
+                    "probe-sequence",
+                    "--builder",
+                    "examples.rl_actor_case:build_actor",
+                    "--samples",
+                    str(sequence_artifacts["batches"]),
+                    "--loss",
+                    "examples.rl_actor_case:actor_loss",
+                    "--optimizer",
+                    "examples.rl_actor_case:build_optimizer",
+                    "--checkpoints",
+                    *[str(path) for path in sequence_artifacts["checkpoints"]],
+                    "--max-steps",
+                    "2",
+                ],
+                cwd=self.repo_root,
+                env=env,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(sequence_process.returncode, 0, sequence_process.stderr)
+            self.assertIn("History", sequence_process.stdout)
+
     def test_showcase_generator_emits_demo_artifacts(self) -> None:
         from examples.showcase_reports import generate_showcase
 
@@ -143,7 +246,9 @@ class TorchIntegrationTests(unittest.TestCase):
             summary = outputs["summary_json"].read_text(encoding="utf-8")
             self.assertIn("frozen_encoder", summary)
             self.assertIn("frozen_policy_head", summary)
+            self.assertIn("frozen_trunk", summary)
             self.assertIn("global_stall", summary)
+            self.assertIn("checkpoint_sequence", summary)
 
 
 if __name__ == "__main__":

@@ -64,15 +64,15 @@
     <section class="card">
       <h1>RLPlasticity Report</h1>
       <p class="meta">analyzer=plasticity/default | kind=plasticity_probe | evidence=update | layers=3 | loss=1.448103904724121</p>
-      <p>No acute issue detected. Plasticity score=1.000 (update-active=1.000, grad-active=1.000)</p>
+      <p>The shared trunk is adapting less than surrounding modules.</p>
     </section>
     <section class="card">
       <h2>Metrics</h2>
-      <ul><li><strong>plasticity_score</strong>: Plasticity score=1.000 (update-active=1.000, grad-active=1.000)</li><li><strong>stagnant_layer_fraction</strong>: Stagnant layer fraction=0.000</li><li><strong>encoder_plasticity_score</strong>: encoder plasticity score=1.000</li><li><strong>trunk_plasticity_score</strong>: trunk plasticity score=1.000</li><li><strong>policy_plasticity_score</strong>: policy plasticity score=1.000</li><li><strong>value_plasticity_score</strong>: No value layers were captured.</li><li><strong>mean_activation_shift</strong>: Mean activation shift=0.000000</li><li><strong>plasticity_trend_delta</strong>: Plasticity trend unavailable without at least two history points.</li><li><strong>encoder_plasticity_trend_delta</strong>: encoder plasticity trend unavailable without at least two history points.</li><li><strong>trunk_plasticity_trend_delta</strong>: trunk plasticity trend unavailable without at least two history points.</li><li><strong>policy_plasticity_trend_delta</strong>: policy plasticity trend unavailable without at least two history points.</li></ul>
+      <ul><li><strong>plasticity_score</strong>: Plasticity score=0.778 (update-active=0.667, grad-active=0.667)</li><li><strong>stagnant_layer_fraction</strong>: Stagnant layer fraction=0.333 (examples: trunk.0)</li><li><strong>encoder_plasticity_score</strong>: encoder plasticity score=1.000</li><li><strong>trunk_plasticity_score</strong>: trunk plasticity score=0.000</li><li><strong>policy_plasticity_score</strong>: policy plasticity score=1.000</li><li><strong>value_plasticity_score</strong>: No value layers were captured.</li><li><strong>mean_activation_shift</strong>: Mean activation shift=0.000000</li><li><strong>plasticity_trend_delta</strong>: Plasticity trend unavailable without at least two history points.</li><li><strong>encoder_plasticity_trend_delta</strong>: encoder plasticity trend unavailable without at least two history points.</li><li><strong>trunk_plasticity_trend_delta</strong>: trunk plasticity trend unavailable without at least two history points.</li><li><strong>policy_plasticity_trend_delta</strong>: policy plasticity trend unavailable without at least two history points.</li></ul>
     </section>
     <section class="card">
       <h2>Findings</h2>
-      <p>No diagnostic rule fired.</p>
+      <section class='finding'><h3>MEDIUM: The shared trunk is adapting less than surrounding modules.</h3><p><strong>Rule:</strong> trunk_bottleneck | <strong>Confidence:</strong> medium</p><ul><li>trunk_plasticity_score=0.000</li><li>reference_neighbor_score=1.000</li></ul><ul><li>Inspect whether the shared trunk is over-regularized or blocked by normalization settings.</li><li>Compare encoder and head gradients against trunk gradients across several nearby steps.</li><li>Check whether trunk activations are saturating before the output heads.</li></ul></section>
     </section>
     <section class="card">
       <h2>Caveats</h2>
@@ -106,7 +106,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr><td>encoder.0</td><td>encoder</td><td>1.518165e-03</td><td>5.646414e-01</td><td>3.353458e+00</td></tr><tr><td>trunk.0</td><td>trunk</td><td>2.859658e-03</td><td>2.850277e-01</td><td>3.409045e+00</td></tr><tr><td>policy_head</td><td>policy</td><td>2.938991e-03</td><td>9.427109e-02</td><td>1.172762e+00</td></tr>
+          <tr><td>trunk.0</td><td>trunk</td><td>0.000000e+00</td><td>2.850277e-01</td><td>3.409130e+00</td></tr><tr><td>encoder.0</td><td>encoder</td><td>1.518165e-03</td><td>5.646414e-01</td><td>3.353458e+00</td></tr><tr><td>policy_head</td><td>policy</td><td>2.938991e-03</td><td>9.427109e-02</td><td>1.172762e+00</td></tr>
         </tbody>
       </table>
     </section>

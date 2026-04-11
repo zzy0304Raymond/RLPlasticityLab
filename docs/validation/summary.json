@@ -24,11 +24,27 @@
     "html": "frozen_policy_head.html"
   },
   {
+    "case": "frozen_trunk",
+    "summary": "The shared trunk is adapting less than surrounding modules.",
+    "findings": "trunk_bottleneck",
+    "text": "frozen_trunk.txt",
+    "json": "frozen_trunk.json",
+    "html": "frozen_trunk.html"
+  },
+  {
     "case": "global_stall",
     "summary": "The model looks globally plasticity-limited.",
     "findings": "global_plasticity_stall",
     "text": "global_stall.txt",
     "json": "global_stall.json",
     "html": "global_stall.html"
+  },
+  {
+    "case": "checkpoint_sequence",
+    "summary": "No acute issue detected. Plasticity score=1.000 (update-active=1.000, grad-active=1.000)",
+    "findings": "none",
+    "text": "checkpoint_sequence.txt",
+    "json": "checkpoint_sequence.json",
+    "html": "checkpoint_sequence.html"
   }
 ]

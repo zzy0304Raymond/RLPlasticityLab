@@ -11,14 +11,14 @@
         "group": "encoder",
         "module_type": "Linear",
         "parameter_count": 288,
-        "parameter_norm": 3.3534140586853027,
-        "parameter_mean_abs": 0.169809490442276,
+        "parameter_norm": 3.3534579277038574,
+        "parameter_mean_abs": 0.16980116069316864,
         "parameter_zero_fraction": 0.0,
-        "parameter_max_abs": 0.3532157838344574,
-        "gradient_norm": 0.0,
-        "update_norm": 0.0,
-        "relative_update": 0.0,
-        "grad_to_weight_ratio": 0.0,
+        "parameter_max_abs": 0.35351577401161194,
+        "gradient_norm": 0.11852888762950897,
+        "update_norm": 0.005091103725135326,
+        "relative_update": 0.0015181653788098218,
+        "grad_to_weight_ratio": 0.03534527350121454,
         "activation_mean": -0.050691016018390656,
         "activation_std": 0.5646414160728455,
         "activation_shift": null,
@@ -31,14 +31,14 @@
         "group": "trunk",
         "module_type": "Linear",
         "parameter_count": 1056,
-        "parameter_norm": 3.4090445041656494,
-        "parameter_mean_abs": 0.09176577627658844,
+        "parameter_norm": 3.409130096435547,
+        "parameter_mean_abs": 0.09176293760538101,
         "parameter_zero_fraction": 0.0,
-        "parameter_max_abs": 0.1768421232700348,
-        "gradient_norm": 0.2622995674610138,
-        "update_norm": 0.009748701006174088,
-        "relative_update": 0.0028596578877928274,
-        "grad_to_weight_ratio": 0.07694225380176156,
+        "parameter_max_abs": 0.17663080990314484,
+        "gradient_norm": 0.0,
+        "update_norm": 0.0,
+        "relative_update": 0.0,
+        "grad_to_weight_ratio": 0.0,
         "activation_mean": -0.012912792153656483,
         "activation_std": 0.28502771258354187,
         "activation_shift": null,
@@ -68,7 +68,7 @@
       }
     ],
     "metadata": {
-      "validation_case": "frozen_encoder",
+      "validation_case": "frozen_trunk",
       "demo_accuracy": 0.21875,
       "cross_entropy": 1.383522391319275
     },
@@ -90,32 +90,32 @@
     "stagnant_layer_fraction": {
       "name": "stagnant_layer_fraction",
       "value": 0.3333333333333333,
-      "summary": "Stagnant layer fraction=0.333 (examples: encoder.0)",
+      "summary": "Stagnant layer fraction=0.333 (examples: trunk.0)",
       "metadata": {
         "stagnant_layers": [
-          "encoder.0"
+          "trunk.0"
         ],
         "eligible_layers": 3
       }
     },
     "encoder_plasticity_score": {
       "name": "encoder_plasticity_score",
-      "value": 0.0,
-      "summary": "encoder plasticity score=0.000",
+      "value": 1.0,
+      "summary": "encoder plasticity score=1.000",
       "metadata": {
         "layer_count": 1,
-        "mean_relative_update": 0.0,
-        "mean_grad_to_weight_ratio": 0.0
+        "mean_relative_update": 0.0015181653788098218,
+        "mean_grad_to_weight_ratio": 0.03534527350121454
       }
     },
     "trunk_plasticity_score": {
       "name": "trunk_plasticity_score",
-      "value": 1.0,
-      "summary": "trunk plasticity score=1.000",
+      "value": 0.0,
+      "summary": "trunk plasticity score=0.000",
       "metadata": {
         "layer_count": 1,
-        "mean_relative_update": 0.0028596578877928274,
-        "mean_grad_to_weight_ratio": 0.07694225380176156
+        "mean_relative_update": 0.0,
+        "mean_grad_to_weight_ratio": 0.0
       }
     },
     "policy_plasticity_score": {
@@ -185,17 +185,17 @@
   },
   "findings": [
     {
-      "name": "encoder_bottleneck",
+      "name": "trunk_bottleneck",
       "severity": "medium",
-      "summary": "The encoder is adapting less than downstream layers.",
+      "summary": "The shared trunk is adapting less than surrounding modules.",
       "evidence": [
-        "encoder_plasticity_score=0.000",
-        "reference_downstream_score=1.000"
+        "trunk_plasticity_score=0.000",
+        "reference_neighbor_score=1.000"
       ],
       "recommendations": [
-        "Inspect encoder-specific gradients and update magnitudes across several consecutive steps.",
-        "Check whether observations or augmentations are causing feature collapse or over-stable representations.",
-        "Consider lower encoder regularization or a separate optimizer schedule for the encoder."
+        "Inspect whether the shared trunk is over-regularized or blocked by normalization settings.",
+        "Compare encoder and head gradients against trunk gradients across several nearby steps.",
+        "Check whether trunk activations are saturating before the output heads."
       ],
       "confidence": "medium",
       "metadata": {}

@@ -68,7 +68,7 @@
     </section>
     <section class="card">
       <h2>Metrics</h2>
-      <ul><li><strong>plasticity_score</strong>: Plasticity score=0.778 (update-active=0.667, grad-active=0.667)</li><li><strong>stagnant_layer_fraction</strong>: Stagnant layer fraction=0.333 (examples: policy_head)</li><li><strong>encoder_plasticity_score</strong>: encoder plasticity score=1.000</li><li><strong>trunk_plasticity_score</strong>: trunk plasticity score=1.000</li><li><strong>policy_plasticity_score</strong>: policy plasticity score=0.000</li><li><strong>value_plasticity_score</strong>: No value layers were captured.</li><li><strong>mean_activation_shift</strong>: Mean activation shift=0.000000</li></ul>
+      <ul><li><strong>plasticity_score</strong>: Plasticity score=0.778 (update-active=0.667, grad-active=0.667)</li><li><strong>stagnant_layer_fraction</strong>: Stagnant layer fraction=0.333 (examples: policy_head)</li><li><strong>encoder_plasticity_score</strong>: encoder plasticity score=1.000</li><li><strong>trunk_plasticity_score</strong>: trunk plasticity score=1.000</li><li><strong>policy_plasticity_score</strong>: policy plasticity score=0.000</li><li><strong>value_plasticity_score</strong>: No value layers were captured.</li><li><strong>mean_activation_shift</strong>: Mean activation shift=0.000000</li><li><strong>plasticity_trend_delta</strong>: Plasticity trend unavailable without at least two history points.</li><li><strong>encoder_plasticity_trend_delta</strong>: encoder plasticity trend unavailable without at least two history points.</li><li><strong>trunk_plasticity_trend_delta</strong>: trunk plasticity trend unavailable without at least two history points.</li><li><strong>policy_plasticity_trend_delta</strong>: policy plasticity trend unavailable without at least two history points.</li></ul>
     </section>
     <section class="card">
       <h2>Findings</h2>
@@ -77,6 +77,21 @@
     <section class="card">
       <h2>Caveats</h2>
       <ul><li>This is a low-cost plasticity probe, not a full experiment. Treat the result as ranked evidence for where to investigate next.</li></ul>
+    </section>
+    <section class="card">
+      <h2>History</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Label</th>
+            <th>Loss</th>
+            <th>Mean Relative Update</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan='3'>No history recorded.</td></tr>
+        </tbody>
+      </table>
     </section>
     <section class="card">
       <h2>Lowest-Update Layers</h2>

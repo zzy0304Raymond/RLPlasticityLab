@@ -112,6 +112,42 @@ def export_demo_artifacts(
     }
 
 
+def export_training_sequence_artifacts(
+    output_dir: str | Path,
+    *,
+    steps: int = 3,
+    batch_size: int = 32,
+    seed: int = DEFAULT_SEED,
+) -> dict[str, object]:
+    """Export a short sequence of checkpoints produced by light demo training."""
+
+    output = Path(output_dir)
+    output.mkdir(parents=True, exist_ok=True)
+
+    model = build_actor()
+    optimizer = build_optimizer(model)
+    checkpoints: list[Path] = []
+    batches: list[dict[str, torch.Tensor]] = []
+
+    for step in range(steps):
+        batch = make_batch(batch_size=batch_size, seed=seed + step)
+        batches.append(batch)
+        optimizer.zero_grad(set_to_none=True)
+        loss, _ = actor_loss(model, batch)
+        loss.backward()
+        optimizer.step()
+        checkpoint_path = output / f"actor_step_{step + 1}.pt"
+        torch.save(model.state_dict(), checkpoint_path)
+        checkpoints.append(checkpoint_path)
+
+    batch_path = output / "sequence_batches.pt"
+    torch.save(batches, batch_path)
+    return {
+        "checkpoints": checkpoints,
+        "batches": batch_path,
+    }
+
+
 def run_demo(output_dir: str | Path) -> None:
     artifacts = export_demo_artifacts(output_dir)
     actor_path = artifacts["actor"]

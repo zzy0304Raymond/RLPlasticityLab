@@ -142,6 +142,46 @@
       "metadata": {
         "samples": 0
       }
+    },
+    "plasticity_trend_delta": {
+      "name": "plasticity_trend_delta",
+      "value": 0.0,
+      "summary": "Plasticity trend unavailable without at least two history points.",
+      "metadata": {
+        "points": 0,
+        "start": null,
+        "end": null
+      }
+    },
+    "encoder_plasticity_trend_delta": {
+      "name": "encoder_plasticity_trend_delta",
+      "value": 0.0,
+      "summary": "encoder plasticity trend unavailable without at least two history points.",
+      "metadata": {
+        "points": 0,
+        "start": null,
+        "end": null
+      }
+    },
+    "trunk_plasticity_trend_delta": {
+      "name": "trunk_plasticity_trend_delta",
+      "value": 0.0,
+      "summary": "trunk plasticity trend unavailable without at least two history points.",
+      "metadata": {
+        "points": 0,
+        "start": null,
+        "end": null
+      }
+    },
+    "policy_plasticity_trend_delta": {
+      "name": "policy_plasticity_trend_delta",
+      "value": 0.0,
+      "summary": "policy plasticity trend unavailable without at least two history points.",
+      "metadata": {
+        "points": 0,
+        "start": null,
+        "end": null
+      }
     }
   },
   "findings": [

@@ -7,7 +7,13 @@ import importlib
 import json
 from pathlib import Path
 
-from rlplasticity.api import probe_model, probe_plasticity, scan_checkpoint
+from rlplasticity.api import (
+    probe_checkpoint_sequence,
+    probe_model,
+    probe_plasticity,
+    probe_plasticity_window,
+    scan_checkpoint,
+)
 
 
 def _load_symbol(spec: str):
@@ -59,6 +65,30 @@ def build_parser() -> argparse.ArgumentParser:
     probe_update.add_argument("--optimizer", help="Optimizer factory spec pkg.module:callable")
     probe_update.add_argument("--max-steps", type=int, default=1)
 
+    probe_window = subparsers.add_parser("probe-window", help="Run a multi-batch plasticity window probe.")
+    probe_window.add_argument("--builder", required=True, help="Model builder spec pkg.module:callable")
+    probe_window.add_argument("--samples", required=True, help="Sample artifact path (.pt or .json)")
+    probe_window.add_argument("--loss", required=True, help="Loss fn spec pkg.module:callable")
+    probe_window.add_argument("--checkpoint")
+    probe_window.add_argument("--optimizer", help="Optimizer factory spec pkg.module:callable")
+    probe_window.add_argument("--max-steps", type=int, default=8)
+
+    probe_sequence = subparsers.add_parser(
+        "probe-sequence",
+        help="Run a plasticity probe across a sequence of checkpoints.",
+    )
+    probe_sequence.add_argument("--builder", required=True, help="Model builder spec pkg.module:callable")
+    probe_sequence.add_argument("--samples", required=True, help="Sample artifact path (.pt or .json)")
+    probe_sequence.add_argument("--loss", required=True, help="Loss fn spec pkg.module:callable")
+    probe_sequence.add_argument("--optimizer", required=True, help="Optimizer factory spec pkg.module:callable")
+    probe_sequence.add_argument(
+        "--checkpoints",
+        nargs="+",
+        required=True,
+        help="Ordered list of checkpoint paths to compare.",
+    )
+    probe_sequence.add_argument("--max-steps", type=int, default=4)
+
     return parser
 
 
@@ -96,6 +126,43 @@ def main(argv: list[str] | None = None) -> int:
             loss_fn=loss_fn,
             optimizer=optimizer,
             checkpoint=args.checkpoint,
+            max_steps=args.max_steps,
+        )
+    elif args.command == "probe-window":
+        builder = _load_symbol(args.builder)
+        model = builder()
+        batch = _load_samples(args.samples)
+        loss_fn = _load_symbol(args.loss)
+        if args.optimizer:
+            optimizer_factory = _load_symbol(args.optimizer)
+            optimizer = optimizer_factory(model)
+        else:
+            try:
+                import torch
+            except ModuleNotFoundError as exc:  # pragma: no cover
+                raise RuntimeError(
+                    "PyTorch is required to build the default optimizer for a window probe."
+                ) from exc
+            optimizer = torch.optim.Adam(model.parameters(), lr=3e-4)
+        report = probe_plasticity_window(
+            model,
+            batch,
+            loss_fn=loss_fn,
+            optimizer=optimizer,
+            checkpoint=args.checkpoint,
+            max_steps=args.max_steps,
+        )
+    elif args.command == "probe-sequence":
+        builder = _load_symbol(args.builder)
+        batch = _load_samples(args.samples)
+        loss_fn = _load_symbol(args.loss)
+        optimizer_factory = _load_symbol(args.optimizer)
+        report = probe_checkpoint_sequence(
+            builder,
+            args.checkpoints,
+            batch,
+            loss_fn=loss_fn,
+            optimizer_builder=optimizer_factory,
             max_steps=args.max_steps,
         )
     else:  # pragma: no cover

@@ -10,6 +10,38 @@ This project is built for fast triage, not experiment replacement. It is most us
 
 Technical Report: [GitHub Pages report](docs/index.md)
 
+## How Most Users Start
+
+Clone the repository, create a virtual environment, install with the PyTorch extra, and run the bundled demo:
+
+```bash
+git clone https://github.com/zzy0304Raymond/RLPlasticityLab.git
+cd RLPlasticityLab
+python -m venv .venv
+```
+
+PowerShell:
+
+```bash
+.venv\Scripts\Activate.ps1
+pip install -e ".[torch]"
+python -m examples.rl_actor_case --output-dir reports/demo_rl_actor_case --run
+```
+
+macOS / Linux:
+
+```bash
+source .venv/bin/activate
+pip install -e ".[torch]"
+python -m examples.rl_actor_case --output-dir reports/demo_rl_actor_case --run
+```
+
+If you only want to scan a checkpoint:
+
+```bash
+rlplasticity scan --checkpoint actor.pt
+```
+
 ## What It Looks Like In Practice
 
 Healthy checkpoint vs a checkpoint with a frozen encoder:
@@ -171,6 +203,28 @@ Install with PyTorch support:
 pip install -e ".[torch]"
 ```
 
+## Public Entry Points
+
+The project currently exposes five main Python workflows:
+
+- `scan_checkpoint(...)`
+- `probe_model(...)`
+- `probe_plasticity(...)`
+- `probe_plasticity_window(...)`
+- `probe_checkpoint_sequence(...)`
+
+Convenience helpers are also available for:
+
+- builder-based probing
+  - `probe_model_from_builder(...)`
+  - `probe_plasticity_from_builder(...)`
+- single training-step probing
+  - `probe_training_step(...)`
+- light integration helpers
+  - `rlplasticity.integrations.pytorch`
+  - `rlplasticity.integrations.cleanrl`
+  - `rlplasticity.integrations.sb3`
+
 ## Quick Start
 
 ### A. Analyze a checkpoint directly
@@ -179,6 +233,39 @@ pip install -e ".[torch]"
 from rlplasticity import scan_checkpoint
 
 report = scan_checkpoint("actor.pt")
+print(report.to_text())
+```
+
+### D. Run a short multi-batch plasticity window
+
+```python
+from rlplasticity import probe_plasticity_window
+
+report = probe_plasticity_window(
+    model,
+    batches,
+    loss_fn=loss_fn,
+    optimizer=optimizer,
+    max_steps=8,
+)
+
+print(report.to_text())
+```
+
+### E. Compare a checkpoint sequence
+
+```python
+from rlplasticity import probe_checkpoint_sequence
+
+report = probe_checkpoint_sequence(
+    build_model,
+    checkpoints,
+    batches,
+    loss_fn=loss_fn,
+    optimizer_builder=build_optimizer,
+    max_steps=4,
+)
+
 print(report.to_text())
 ```
 
@@ -236,6 +323,30 @@ rlplasticity probe-plasticity \
   --max-steps 8
 ```
 
+Plasticity window:
+
+```bash
+rlplasticity probe-window \
+  --builder mypkg.models:build_actor \
+  --samples replay_window.pt \
+  --loss mypkg.losses:actor_loss \
+  --optimizer mypkg.optim:build_optimizer \
+  --checkpoint actor.pt \
+  --max-steps 8
+```
+
+Checkpoint sequence:
+
+```bash
+rlplasticity probe-sequence \
+  --builder mypkg.models:build_actor \
+  --samples replay_window.pt \
+  --loss mypkg.losses:actor_loss \
+  --optimizer mypkg.optim:build_optimizer \
+  --checkpoints ckpt_10.pt ckpt_20.pt ckpt_30.pt \
+  --max-steps 4
+```
+
 ## Real Example In This Repo
 
 This repository ships a demo actor case with:
@@ -245,6 +356,7 @@ This repository ships a demo actor case with:
 - `forward_batch`
 - `actor_loss`
 - `export_demo_artifacts`
+- `export_training_sequence_artifacts`
 
 Generate a reusable demo checkpoint and batch:
 
@@ -290,6 +402,15 @@ Generate the release validation suite:
 python -m examples.validation_suite --output-dir docs/validation
 ```
 
+Generate a short checkpoint sequence demo:
+
+```bash
+python - <<'PY'
+from examples.rl_actor_case import export_training_sequence_artifacts
+print(export_training_sequence_artifacts("reports/demo_sequence"))
+PY
+```
+
 ## What You Get Back
 
 Each report includes:
@@ -299,6 +420,7 @@ Each report includes:
 - key metrics
 - findings
 - caveats
+- optional history rows for windows and checkpoint sequences
 - a shortlist of layers worth checking next
 
 Reports can be rendered as:
@@ -313,6 +435,7 @@ Reports can be rendered as:
 src/rlplasticity/
   core/          # shared schemas, enums, aggregation, base interfaces
   ingest/        # checkpoint loading and static summarization
+  integrations/  # lightweight helpers for raw PyTorch, CleanRL, and SB3-style setups
   probes/        # evidence collection workflows
   plasticity/    # metrics, rules, analyzers
   reporting/     # text/html rendering
@@ -326,6 +449,9 @@ Release-oriented docs:
 
 - Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - Validation: [docs/VALIDATION.md](docs/VALIDATION.md)
+- Report schema: [docs/REPORT_SCHEMA.md](docs/REPORT_SCHEMA.md)
+- Troubleshooting: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
+- Roadmap: [docs/ROADMAP.md](docs/ROADMAP.md)
 - Changelog: [docs/CHANGELOG.md](docs/CHANGELOG.md)
 - Release checklist: [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md)
 - Release report: [docs/RELEASE_REPORT_v0.1.0.md](docs/RELEASE_REPORT_v0.1.0.md)
@@ -372,14 +498,13 @@ Current coverage includes:
 - CLI behavior
 - report serialization
 - robustness edge cases
+- trend-aware window and checkpoint-sequence probing
 - optional PyTorch API and CLI integration
 
 ## Roadmap
 
 Planned next:
 
-- more pathological demo cases such as frozen encoders and weak heads
-- checkpoint sequence analysis
-- stronger short-window trend analysis
-- CleanRL / SB3 integration helpers
+- more architecture families beyond the bundled demo actor
+- stronger trainer-specific helper coverage
 - lower-overhead online monitoring

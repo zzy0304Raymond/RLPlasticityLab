@@ -35,7 +35,51 @@ def _average_field(layers: list[LayerSnapshot], field_name: str):
     return mean(values)
 
 
-def aggregate_snapshots(snapshots: list[Snapshot]) -> Snapshot:
+def _nonnull(values: list[float | None]) -> list[float]:
+    return [value for value in values if value is not None]
+
+
+def _mean_or_none(values: list[float | None]) -> float | None:
+    concrete = _nonnull(values)
+    if not concrete:
+        return None
+    return mean(concrete)
+
+
+def build_history_entry(snapshot: Snapshot, *, label: str | None = None) -> dict[str, object]:
+    """Summarize one snapshot into a compact history row for trend analysis."""
+
+    grouped = snapshot.by_group()
+    group_relative_update = {
+        group: _mean_or_none([layer.relative_update for layer in layers])
+        for group, layers in grouped.items()
+    }
+    group_grad_ratio = {
+        group: _mean_or_none([layer.grad_to_weight_ratio for layer in layers])
+        for group, layers in grouped.items()
+    }
+    relative_updates = _nonnull([layer.relative_update for layer in snapshot.layers])
+    grad_ratios = _nonnull([layer.grad_to_weight_ratio for layer in snapshot.layers])
+
+    return {
+        "label": label or f"step-{snapshot.step if snapshot.step is not None else 'unknown'}",
+        "step": snapshot.step,
+        "loss": snapshot.loss,
+        "mean_relative_update": _mean_or_none(relative_updates),
+        "mean_grad_to_weight_ratio": _mean_or_none(grad_ratios),
+        "group_relative_update": group_relative_update,
+        "group_grad_to_weight_ratio": group_grad_ratio,
+        "layer_count": len(snapshot.layers),
+    }
+
+
+def aggregate_snapshots(
+    snapshots: list[Snapshot],
+    *,
+    history_label_prefix: str = "step",
+    metadata_updates: dict[str, object] | None = None,
+    caveat: str | None = None,
+) -> Snapshot:
     """Average a short window of snapshots into one stable summary."""
 
     if not snapshots:
@@ -80,14 +124,20 @@ def aggregate_snapshots(snapshots: list[Snapshot]) -> Snapshot:
 
     base = snapshots[0]
     metadata = dict(base.metadata)
+    metadata.update(metadata_updates or {})
     metadata["window_size"] = len(snapshots)
     metadata["loss_mean"] = mean(
         snapshot.loss for snapshot in snapshots if snapshot.loss is not None
     ) if any(snapshot.loss is not None for snapshot in snapshots) else None
+    metadata["history"] = [
+        build_history_entry(snapshot, label=f"{history_label_prefix}-{index + 1}")
+        for index, snapshot in enumerate(snapshots)
+    ]
 
     caveats = list(base.caveats)
     caveats.append(
-        f"This report averages {len(snapshots)} probe steps; inspect per-step results if the signal looks unstable."
+        caveat
+        or f"This report averages {len(snapshots)} probe steps; inspect per-step results if the signal looks unstable."
     )
     return Snapshot(
         kind=base.kind,

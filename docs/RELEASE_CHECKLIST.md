@@ -7,6 +7,8 @@
 - regenerate showcase artifacts
 - regenerate validation artifacts
 - confirm README quick start still matches public APIs
+- confirm README command examples cover `probe-window` and `probe-sequence`
+- confirm report schema docs match actual JSON output
 - run full test suite
 
 ## Validation Commands
@@ -36,13 +38,23 @@ python -m examples.showcase_reports --output-dir docs/showcase
 python -m examples.validation_suite --output-dir docs/validation
 ```
 
+```bash
+python -m rlplasticity.cli probe-window --help
+```
+
+```bash
+python -m rlplasticity.cli probe-sequence --help
+```
+
 ## Release Criteria For 0.1.0
 
 - all tests pass
 - healthy case stays quiet
 - frozen encoder triggers `encoder_bottleneck`
+- frozen trunk triggers `trunk_bottleneck`
 - frozen policy head triggers `head_saturation`
 - global stall triggers `global_plasticity_stall`
+- checkpoint sequence emits history metadata
 - README links resolve
 - package installs with and without the `torch` extra
 
